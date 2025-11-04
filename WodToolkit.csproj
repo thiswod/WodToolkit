@@ -1,0 +1,54 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <Nullable>enable</Nullable>
+    <PackAsTool>False</PackAsTool>
+    <!-- NuGet包元数据 -->
+    <PackageId>WodToolKit</PackageId>
+    <Version>1.0.0.0</Version>
+    <Title>WodToolKit - 轻量级.NET工具库</Title>
+    <Authors>Wod</Authors>
+    <Company>Wod</Company>
+    <Description>WodToolKit是一个功能丰富的轻量级.NET综合工具库，旨在封装各类常用功能，简化开发工作，提高开发效率。该库采用.NET Standard 2.1标准，确保在各种.NET平台上的广泛兼容性，目前已实现HTTP请求处理、Cookie管理和JSON解析等功能，未来将持续扩展更多实用工具模块。</Description>
+    <Summary>轻量级.NET综合工具库，提供各类常用功能封装，目前包含HTTP、Cookie和JSON处理模块。</Summary>
+    <PackageProjectUrl>https://github.com/thiswod/WodToolKit</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/thiswod/WodToolKit</RepositoryUrl>
+    <RepositoryType>Git</RepositoryType>
+    <PackageTags>http,json,cookie,.netstandard,toolkit,web,extensions</PackageTags>
+    <Copyright>© Wod. All rights reserved.</Copyright>
+    <IncludeSymbols>False</IncludeSymbols>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageIcon>icon.png</PackageIcon>
+    <ReleaseNotes>
+      ## 1.0.0.0
+      - 初始版本发布
+      - 实现HTTP请求处理功能
+      - 实现完整的Cookie管理功能
+      - 实现灵活的JSON解析功能
+      - 实现URL参数处理工具
+    </ReleaseNotes>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <!-- NuGet包自述文件配置 -->
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <Optimize>False</Optimize>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <Optimize>True</Optimize>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Text.Json" Version="9.0.10" />
+    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+  </ItemGroup>
+
+  <!-- 将README.md和图标包含在NuGet包中 -->
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="" />
+    <None Include="icon.png" Pack="true" PackagePath="" />
+  </ItemGroup>
+</Project>
