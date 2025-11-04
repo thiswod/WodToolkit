@@ -8,6 +8,7 @@
 - **Cookie管理**：完整的Cookie管理功能，支持添加、获取、删除和批量操作
 - **JSON解析**：灵活的JSON序列化和反序列化，支持动态类型和自定义类型
 - **URL工具**：URL参数处理、排序和转换工具
+- **AES加密**：安全的AES加密和解密功能，支持多种加密模式和填充方式
 - **.NET Standard 2.1兼容**：支持.NET Core、.NET Framework和其他兼容平台
 - **模块化设计**：各功能模块相互独立，便于扩展和维护
 - **持续更新**：计划逐步添加更多常用功能模块
@@ -84,10 +85,30 @@ Console.WriteLine(result.value); // 输出: 42
 var obj = EasyJson.ParseJsonObject<MyClass>(json);
 ```
 
+### AES加密示例
+
+```csharp
+using WodToolKit.Encode;
+
+// 创建AES加密实例
+var aes = new AesCrypt();
+
+// 加密字符串
+string plainText = "Hello, World!";
+string key = "YourSecretKey123456";
+string encrypted = aes.Encrypt(plainText, key);
+Console.WriteLine($"加密后: {encrypted}");
+
+// 解密字符串
+string decrypted = aes.Decrypt(encrypted, key);
+Console.WriteLine($"解密后: {decrypted}");
+```
+
 ## 项目结构
 
 ```
 ├── src/
+│   ├── Encode/         # 加密相关功能
 │   ├── Http/           # HTTP相关功能
 │   └── Json/           # JSON处理功能
 ├── WodToolkit.csproj   # 项目文件
@@ -98,6 +119,7 @@ var obj = EasyJson.ParseJsonObject<MyClass>(json);
 
 - System.Text.Json - JSON处理
 - Microsoft.CSharp - 动态类型支持
+- System.Security.Cryptography - 加密功能支持
 
 ## 许可证
 
