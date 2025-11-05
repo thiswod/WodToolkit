@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
 
-namespace WodToolkit.src.Cache
+namespace WodToolkit.Cache
 {
     /// <summary>
     /// 基于内存的临时缓存实现（非持久化）

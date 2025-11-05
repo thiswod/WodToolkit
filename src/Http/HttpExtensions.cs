@@ -5,9 +5,9 @@ using System.Net;
 using System.Text;
 using System.Web;
 
-namespace WodToolkit.src.Http
+namespace WodToolkit.Http.Extensions
 {
-    public class Extensions
+    public class HttpExtensions
     {
         #region URL参数相关方法
         /// <summary>

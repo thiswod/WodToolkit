@@ -5,7 +5,7 @@ using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace WodToolkit.src.Json
+namespace WodToolkit.Json
 {
     public class EasyJson
     {
