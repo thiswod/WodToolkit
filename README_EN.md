@@ -1,6 +1,6 @@
 # WodToolKit
 
-A lightweight .NET toolkit that provides encapsulation of various common functionalities, designed to simplify development work and improve development efficiency. Currently, it implements HTTP request handling, Cookie management, and JSON parsing, with plans to continuously expand with more practical tools in the future.
+A lightweight .NET toolkit that provides encapsulation of various common functionalities, designed to simplify development work and improve development efficiency. It has implemented HTTP request handling, Cookie management, JSON parsing, memory caching, thread pool, AES encryption, JavaScript execution, and other features.
 
 ## Features
 
