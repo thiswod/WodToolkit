@@ -60,6 +60,10 @@ namespace WodToolkit.src.Http
         /// <summary>
         /// 对整个 URL 进行参数排序（保留协议和域名部分）
         /// </summary>
+        /// <param name="url">完整 URL 字符串（包含协议、域名、路径和查询参数）</param>
+        /// <param name="encodeValues">是否对参数值进行 URL 编码（默认不编码）</param>
+        /// <returns>排序后的 URL 字符串</returns>
+        /// <exception cref="ArgumentException">如果 URL 格式无效</exception>
         public static string SortUrlParametersInFullUrl(string url, bool encodeValues = false)
         {
             if (!Uri.TryCreate(url, UriKind.Absolute, out var uri))
@@ -147,8 +151,9 @@ namespace WodToolkit.src.Http
         }
         private static readonly Random _random = new Random();
         /// <summary>
-        /// 生成随机时间戳
+        /// 生成随机刷新码（16位随机数）
         /// </summary>
+        /// <returns>16位随机刷新码字符串</returns>
         public static string refreshCode()
         {
             double refreshCode = _random.NextDouble();
@@ -157,7 +162,7 @@ namespace WodToolkit.src.Http
         /// <summary>
         /// 获取当前时间戳（13位时间戳）
         /// </summary>
-        /// <returns></returns>
+        /// <returns>当前时间的13位时间戳字符串</returns>
         public static string GetTimeStamp()
         {
             long timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
@@ -166,8 +171,8 @@ namespace WodToolkit.src.Http
         /// <summary>
         /// 获取URL中的参数
         /// </summary>
-        /// <param name="url"></param>
-        /// <returns></returns>
+        /// <param name="url">完整 URL 字符串（包含协议、域名、路径和查询参数）</param>
+        /// <returns>URL 中的查询参数部分（不包含问号）</returns>
         public static string GetQueryString(string url)
         {
             int index = url.IndexOf('?');
@@ -179,8 +184,8 @@ namespace WodToolkit.src.Http
         /// <summary>
         /// 获取URL中的参数并排序
         /// </summary>
-        /// <param name="url"></param>
-        /// <returns></returns>
+        /// <param name="url">完整 URL 字符串（包含协议、域名、路径和查询参数）</param>
+        /// <returns>包含排序后的键值对的字典</returns>
         public static Dictionary<string, string> ParseQueryString(string url)
         {
             if (string.IsNullOrWhiteSpace(url) || !url.Contains("?"))
@@ -216,7 +221,11 @@ namespace WodToolkit.src.Http
 
             return parameters;
         }
-        // 将字典转换为查询字符串
+        /// <summary>
+        /// 将字典转换为查询字符串
+        /// </summary>
+        /// <param name="parameters">包含键值对的字典</param>
+        /// <returns>格式化的查询字符串，格式为key1=value1&key2=value2</returns>
         public static string ToQueryString(Dictionary<string, string> parameters)
         {
             if (parameters == null || parameters.Count == 0)

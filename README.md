@@ -9,6 +9,7 @@
 - **JSON解析**：灵活的JSON序列化和反序列化，支持动态类型和自定义类型
 - **URL工具**：URL参数处理、排序和转换工具
 - **AES加密**：安全的AES加密和解密功能，支持多种加密模式和填充方式
+- **Dialog对话框**：跨平台的对话框实现，提供命令行输入功能
 - **.NET Standard 2.1兼容**：支持.NET Core、.NET Framework和其他兼容平台
 - **模块化设计**：各功能模块相互独立，便于扩展和维护
 - **持续更新**：计划逐步添加更多常用功能模块
@@ -28,6 +29,20 @@ dotnet add package WodToolKit
 ```
 
 ## 快速开始
+
+### Dialog输入对话框示例
+
+```csharp
+using WodToolkit.src.Dialog;
+
+// 使用控制台实现的输入对话框
+var inputDialog = new InputDialog.ConsoleImpl("请输入您的姓名：");
+var result = inputDialog.Show();
+
+if (result.IsOk)
+{
+    Console.WriteLine($"您好，{result.InputText}！");
+}
 
 ### HTTP请求示例
 
@@ -108,6 +123,7 @@ Console.WriteLine($"解密后: {decrypted}");
 
 ```
 ├── src/
+│   ├── Dialog/         # 对话框相关功能
 │   ├── Encode/         # 加密相关功能
 │   ├── Http/           # HTTP相关功能
 │   └── Json/           # JSON处理功能

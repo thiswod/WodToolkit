@@ -25,6 +25,10 @@ namespace WodToolkit.Http
         /// <summary>
         /// 设置单个 Cookie
         /// </summary>
+        /// <param name="name">Cookie 名称</param>
+        /// <param name="value">Cookie 值</param>
+        /// <returns>当前 CookieManager 实例（用于链式调用）</returns>
+        /// <exception cref="ArgumentNullException">如果名称为空</exception>
         public CookieManager SetCookie(string name, string value)
         {
             if (string.IsNullOrEmpty(name))
@@ -40,6 +44,8 @@ namespace WodToolkit.Http
         /// <summary>
         /// 批量设置 Cookie（通过字典）
         /// </summary>
+        /// <param name="cookies">包含 Cookie 名称和值的字典</param>
+        /// <returns>当前 CookieManager 实例（用于链式调用）</returns>
         public CookieManager SetCookie(Dictionary<string, string> cookies)
         {
             if (cookies == null)
@@ -52,8 +58,10 @@ namespace WodToolkit.Http
             return this;
         }
         /// <summary>
-        /// 设置 Cookie 字符串（批量添加）
+        /// 批量设置 Cookie（通过 Cookie 字符串）
         /// </summary>
+        /// <param name="cookieString">Cookie 字符串，格式为key1=value1; key2=value2</param>
+        /// <returns>当前 CookieManager 实例（用于链式调用）</returns>
         public CookieManager SetCookie(string cookieString)
         {
             if (string.IsNullOrWhiteSpace(cookieString))
@@ -86,6 +94,10 @@ namespace WodToolkit.Http
         /// <summary>
         /// 从 CoreWebView2CookieManager 导入所有 Cookie
         /// </summary>
+        /// <param name="webViewCookieManager">CoreWebView2CookieManager 实例</param>
+        /// <returns>导入 Cookie 后的 CookieManager 实例（用于链式调用）</returns>
+        /// <exception cref="ArgumentNullException">如果 webViewCookieManager 为空</exception>
+        /// <exception cref="NotSupportedException">如果 webViewCookieManager 不支持 GetCookiesAsync 方法</exception>
         public async Task ImportFromWebView2Async(object webViewCookieManager)
         {
             if (webViewCookieManager == null)
@@ -106,6 +118,10 @@ namespace WodToolkit.Http
         /// <summary>
         /// 导出所有 Cookie 到 CoreWebView2CookieManager
         /// </summary>
+        /// <param name="webViewCookieManager">CoreWebView2CookieManager 实例</param>
+        /// <returns>导出 Cookie 后的 CookieManager 实例（用于链式调用）</returns>
+        /// <exception cref="ArgumentNullException">如果 webViewCookieManager 为空</exception>
+        /// <exception cref="NotSupportedException">如果 webViewCookieManager 不支持 CreateCookie 或 AddOrUpdateCookie 方法</exception>
         public async Task ExportToWebView2Async(object webViewCookieManager)
         {
             if (webViewCookieManager == null)
@@ -131,6 +147,9 @@ namespace WodToolkit.Http
         /// <summary>
         /// 获取指定 Cookie 的值
         /// </summary>
+        /// <param name="name">Cookie 名称</param>
+        /// <returns>Cookie 值（如果存在）；否则为空字符串</returns>
+        /// <exception cref="ArgumentNullException">如果 name 为空</exception>
         public string GetCookieValue(string name)
         {
             if (string.IsNullOrEmpty(name))
@@ -143,14 +162,21 @@ namespace WodToolkit.Http
         /// <summary>
         /// 检查指定 Cookie 是否存在
         /// </summary>
+        /// <param name="name">Cookie 名称</param>
+        /// <returns>如果 Cookie 存在则为 true；否则为 false</returns>
+        /// <exception cref="ArgumentNullException">如果 name 为空</exception>
         public bool HasCookie(string name)
         {
-            return !string.IsNullOrEmpty(name) && _cookies.ContainsKey(name);
+            if (string.IsNullOrEmpty(name))
+                throw new ArgumentNullException(nameof(name));
+
+            return _cookies.ContainsKey(name);
         }
 
         /// <summary>
         /// 获取所有 Cookie 的字典副本
         /// </summary>
+        /// <returns>包含所有 Cookie 键值对的字典副本</returns>
         public Dictionary<string, string> GetAllCookies()
         {
             return new Dictionary<string, string>(_cookies);
@@ -159,6 +185,7 @@ namespace WodToolkit.Http
         /// <summary>
         /// 获取 Cookie 字符串（URL 编码）
         /// </summary>
+        /// <returns>格式化的 Cookie 字符串，格式为 key1=value1; key2=value2</returns>
         public string GetCookieString()
         {
             return string.Join("; ", _cookies.Select(kv =>
@@ -168,6 +195,7 @@ namespace WodToolkit.Http
         /// <summary>
         /// 获取原始 Cookie 字符串（无编码）
         /// </summary>
+        /// <returns>格式化的 Cookie 字符串，格式为 key1=value1; key2=value2</returns>
         public string GetRawCookieString()
         {
             return string.Join("; ", _cookies.Select(kv => $"{kv.Key}={kv.Value}"));
@@ -176,8 +204,14 @@ namespace WodToolkit.Http
         /// <summary>
         /// 删除指定 Cookie
         /// </summary>
+        /// <param name="name">Cookie 名称</param>
+        /// <returns>当前 CookieManager 实例（用于链式调用）</returns>
+        /// <exception cref="ArgumentNullException">如果 name 为空</exception>
         public CookieManager RemoveCookie(string name)
         {
+            if (string.IsNullOrEmpty(name))
+                throw new ArgumentNullException(nameof(name));
+
             if (!string.IsNullOrEmpty(name))
                 _cookies.Remove(name);
             return this;
@@ -186,6 +220,7 @@ namespace WodToolkit.Http
         /// <summary>
         /// 清空所有 Cookie
         /// </summary>
+        /// <returns>当前 CookieManager 实例（用于链式调用）</returns>
         public CookieManager ClearCookies()
         {
             _cookies.Clear();
@@ -199,17 +234,41 @@ namespace WodToolkit.Http
     /// </summary>
     public class HttpResponseData
     {
+        /// <summary>
+        /// HTTP 状态码
+        /// </summary>
         public int StatusCode { get; set; }
+        /// <summary>
+        /// 请求头字符串
+        /// </summary>
         public string RequestHeaders { get; set; }
+        /// <summary>
+        /// 请求头字典
+        /// </summary>
         public Dictionary<string, string> RequestHeadersArray { get; set; }
+        /// <summary>
+        /// 响应头字符串
+        /// </summary>
         public string ResponseHeaders { get; set; }
+        /// <summary>
+        /// 响应头字典
+        /// </summary>
         public Dictionary<string, string> ResponseHeadersArray { get; set; }
+        /// <summary>
+        /// 响应体字符串
+        /// </summary>
         public string Body { get; set; }
+        /// <summary>
+        /// Cookie 管理器
+        /// </summary>
         public CookieManager CookieManager { get; set; }
         /// <summary>
         /// 原始数据
         /// </summary>
         public byte[] rawResult { get; set; }
+        /// <summary>
+        /// 响应头 Cookie 字符串
+        /// </summary>
         public string Cookie { get; set; }
     }
     #endregion
@@ -224,23 +283,65 @@ namespace WodToolkit.Http
         /// 要上传的文件列表
         /// </summary>
         public List<FileUploadContent> Files { get; } = new List<FileUploadContent>();
+        /// <summary>
+        /// 请求 URL
+        /// </summary>
         public string Url { get; set; }
+        /// <summary>
+        /// HTTP 请求方法（默认 Get）
+        /// </summary>
         public HttpMethod Method { get; set; } = HttpMethod.Get;
+        /// <summary>
+        /// 请求数据对象
+        /// </summary>
         public object Data { get; set; }
+        /// <summary>
+        /// 请求头字符串
+        /// </summary>
         public string Headers { get; set; }
+        /// <summary>
+        /// 请求头字典数组
+        /// </summary>
         public Dictionary<string, string> HeadersArray { get; set; } = new Dictionary<string, string>();
+        /// <summary>
+        /// Cookie 管理器
+        /// </summary>
         public CookieManager CookieManager { get; set; } = new CookieManager();
+        /// <summary>
+        /// 请求超时时间（单位：秒，默认 15）
+        /// </summary>
         public int Timeout { get; set; } = 15;
+        /// <summary>
+        /// 代理服务器地址
+        /// </summary>
         public string Proxy { get; set; }
+        /// <summary>
+        /// 代理服务器用户名
+        /// </summary>
         public string ProxyUsername { get; set; }
+        /// <summary>
+        /// 代理服务器密码
+        /// </summary>
         public string ProxyPassword { get; set; }
         /// <summary>
         /// 是否跟随重定向 (默认 true) (false: 不跟随重定向)
         /// </summary>
         public bool FollowLocation { get; set; }
+        /// <summary>
+        /// 是否完整协议头（默认 true）
+        /// </summary>
         public bool CompleteProtocolHeaders { get; set; } = true;
+        /// <summary>
+        /// 是否验证 SSL 证书对等性
+        /// </summary>
         public bool SslVerifyPeer { get; set; }
+        /// <summary>
+        /// 是否验证 SSL 主机名
+        /// </summary>
         public bool SslVerifyHost { get; set; }
+        /// <summary>
+        /// User-Agent 字符串
+        /// </summary>
         public string UserAgent { get; set; }
 
         public HttpRequestParameter(HttpRequestClass parent)
@@ -1163,11 +1264,29 @@ namespace WodToolkit.Http
     /// </summary>
     public class FileUploadContent
     {
+        /// <summary>
+        /// 表单字段名
+        /// </summary>
         public string FieldName { get; set; }
+        /// <summary>
+        /// 文件路径
+        /// </summary>
         public string FilePath { get; set; }
+        /// <summary>
+        /// 文件流
+        /// </summary>
         public Stream FileStream { get; set; }
+        /// <summary>
+        /// 文件数据字节数组
+        /// </summary>
         public byte[] FileData { get; set; }
+        /// <summary>
+        /// 文件名
+        /// </summary>
         public string FileName { get; set; }
+        /// <summary>
+        /// 内容类型（MIME类型）
+        /// </summary>
         public string ContentType { get; set; }
     }
 }
