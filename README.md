@@ -93,26 +93,69 @@ Console.WriteLine("所有任务执行完毕");
 
 ```csharp
 using WodToolkit.Http;
+using System.Net;
+using System.Collections.Generic;
 
-// 创建HTTP请求实例
+// 1. 发送GET请求
 var httpRequest = new HttpRequestClass();
-
-// 发送GET请求
 httpRequest.Open("https://api.example.com/data", HttpMethod.Get).Send();
-
-// 获取响应数据
 var responseData = httpRequest.GetResponse();
 
 // 处理响应
 if (responseData.StatusCode == 200)
 {
-    Console.WriteLine(responseData.Body);
+    Console.WriteLine(responseData.Body); // 响应内容
+    Console.WriteLine(responseData.StatusCode); // 状态码
+    Console.WriteLine(responseData.ResponseHeaders); // 响应头
 }
 
-// 异步发送请求示例
-var httpRequestAsync = new HttpRequestClass();
-await httpRequestAsync.Open("https://api.example.com/data", HttpMethod.Get).SendAsync();
-var responseDataAsync = httpRequestAsync.GetResponse();
+// 2. 发送带查询参数的GET请求
+var getWithParams = new HttpRequestClass();
+getWithParams.Open("https://api.example.com/search?keyword=test&page=1", HttpMethod.Get).Send();
+var searchResponse = getWithParams.GetResponse();
+
+// 3. 发送POST请求（表单数据）
+var postRequest = new HttpRequestClass();
+// 创建表单数据
+var formData = new Dictionary<string, string>
+{
+    { "username", "admin" },
+    { "password", "password123" }
+};
+// 发送POST请求
+postRequest.Open("https://api.example.com/login", HttpMethod.Post).Send(formData);
+var loginResponse = postRequest.GetResponse();
+
+// 4. 发送JSON数据的POST请求
+var jsonRequest = new HttpRequestClass();
+// 设置请求头为JSON
+jsonRequest.Set().HeadersArray["Content-Type"] = "application/json";
+// JSON字符串数据
+string jsonData = "{\"name\":\"测试\",\"age\":25}";
+// 发送请求
+jsonRequest.Open("https://api.example.com/users", HttpMethod.Post).Send(jsonData);
+var userResponse = jsonRequest.GetResponse();
+
+// 5. 发送异步请求示例
+var asyncRequest = new HttpRequestClass();
+// 设置超时时间
+asyncRequest.SetTimeout(30); // 30秒
+// 设置UserAgent
+asyncRequest.SetUserAgent("Mozilla/5.0 WodToolkit");
+// 异步发送请求
+await asyncRequest.Open("https://api.example.com/data", HttpMethod.Get).SendAsync();
+var asyncResponse = asyncRequest.GetResponse();
+
+// 6. 使用Cookie管理器的请求
+var cookieRequest = new HttpRequestClass();
+// 设置Cookie
+cookieRequest.SetCookieString("session=abc123; user=admin");
+// 发送请求，会自动带上设置的Cookie
+cookieRequest.Open("https://api.example.com/protected", HttpMethod.Get).Send();
+var cookieResponse = cookieRequest.GetResponse();
+// 获取响应中的Cookie
+string cookies = cookieResponse.Cookie;
+Console.WriteLine(cookies);
 ```
 
 ### Cookie管理示例

@@ -93,26 +93,69 @@ Console.WriteLine("All tasks completed");
 
 ```csharp
 using WodToolkit.Http;
+using System.Net;
+using System.Collections.Generic;
 
-// Create HTTP request instance
+// 1. Send GET request
 var httpRequest = new HttpRequestClass();
-
-// Send GET request
 httpRequest.Open("https://api.example.com/data", HttpMethod.Get).Send();
-
-// Get response data
 var responseData = httpRequest.GetResponse();
 
 // Process response
 if (responseData.StatusCode == 200)
 {
-    Console.WriteLine(responseData.Body);
+    Console.WriteLine(responseData.Body); // Response content
+    Console.WriteLine(responseData.StatusCode); // Status code
+    Console.WriteLine(responseData.ResponseHeaders); // Response headers
 }
 
-// Asynchronous request example
-var httpRequestAsync = new HttpRequestClass();
-await httpRequestAsync.Open("https://api.example.com/data", HttpMethod.Get).SendAsync();
-var responseDataAsync = httpRequestAsync.GetResponse();
+// 2. Send GET request with query parameters
+var getWithParams = new HttpRequestClass();
+getWithParams.Open("https://api.example.com/search?keyword=test&page=1", HttpMethod.Get).Send();
+var searchResponse = getWithParams.GetResponse();
+
+// 3. Send POST request with form data
+var postRequest = new HttpRequestClass();
+// Create form data
+var formData = new Dictionary<string, string>
+{
+    { "username", "admin" },
+    { "password", "password123" }
+};
+// Send POST request
+postRequest.Open("https://api.example.com/login", HttpMethod.Post).Send(formData);
+var loginResponse = postRequest.GetResponse();
+
+// 4. Send POST request with JSON data
+var jsonRequest = new HttpRequestClass();
+// Set request header to JSON
+jsonRequest.Set().HeadersArray["Content-Type"] = "application/json";
+// JSON string data
+string jsonData = "{\"name\":\"Test\",\"age\":25}";
+// Send request
+jsonRequest.Open("https://api.example.com/users", HttpMethod.Post).Send(jsonData);
+var userResponse = jsonRequest.GetResponse();
+
+// 5. Asynchronous request example
+var asyncRequest = new HttpRequestClass();
+// Set timeout
+asyncRequest.SetTimeout(30); // 30 seconds
+// Set UserAgent
+asyncRequest.SetUserAgent("Mozilla/5.0 WodToolkit");
+// Send asynchronous request
+await asyncRequest.Open("https://api.example.com/data", HttpMethod.Get).SendAsync();
+var asyncResponse = asyncRequest.GetResponse();
+
+// 6. Request with Cookie Manager
+var cookieRequest = new HttpRequestClass();
+// Set Cookie
+cookieRequest.SetCookieString("session=abc123; user=admin");
+// Send request, will automatically include the set Cookie
+cookieRequest.Open("https://api.example.com/protected", HttpMethod.Get).Send();
+var cookieResponse = cookieRequest.GetResponse();
+// Get Cookie from response
+string cookies = cookieResponse.Cookie;
+Console.WriteLine(cookies);
 ```
 
 ### Cookie Management Example
