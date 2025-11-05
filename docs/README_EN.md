@@ -128,12 +128,13 @@ var loginResponse = postRequest.GetResponse();
 
 // 4. Send POST request with JSON data
 var jsonRequest = new HttpRequestClass();
-// Set request header to JSON
-jsonRequest.Set().HeadersArray["Content-Type"] = "application/json";
-// JSON string data
-string jsonData = "{\"name\":\"Test\",\"age\":25}";
+// Send JSON request directly using anonymous object (automatically sets Content-Type to application/json)
 // Send request
-jsonRequest.Open("https://api.example.com/users", HttpMethod.Post).Send(jsonData);
+jsonRequest.Open("https://api.example.com/users", HttpMethod.Post).Send(new 
+{
+    name = "Test",
+    age = 25,
+});
 var userResponse = jsonRequest.GetResponse();
 
 // 5. Asynchronous request example

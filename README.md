@@ -128,12 +128,13 @@ var loginResponse = postRequest.GetResponse();
 
 // 4. 发送JSON数据的POST请求
 var jsonRequest = new HttpRequestClass();
-// 设置请求头为JSON
-jsonRequest.Set().HeadersArray["Content-Type"] = "application/json";
-// JSON字符串数据
-string jsonData = "{\"name\":\"测试\",\"age\":25}";
+// 直接使用匿名对象发送JSON请求（会自动设置Content-Type为application/json）
 // 发送请求
-jsonRequest.Open("https://api.example.com/users", HttpMethod.Post).Send(jsonData);
+jsonRequest.Open("https://api.example.com/users", HttpMethod.Post).Send(new 
+{
+    name = "测试",
+    age = 25,
+});
 var userResponse = jsonRequest.GetResponse();
 
 // 5. 发送异步请求示例
