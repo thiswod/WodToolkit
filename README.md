@@ -11,6 +11,7 @@
 - **AES加密**：安全的AES加密和解密功能，支持多种加密模式和填充方式
 - **内存缓存**：基于内存的临时缓存实现，支持TTL设置和自动清理
 - **线程池管理**：简单高效的线程池实现，支持任务队列和任务等待
+- **JavaScript执行**：通过Node.js执行JavaScript代码，支持代码字符串和文件执行
 - **.NET Standard 2.1兼容**：支持.NET Core、.NET Framework和其他兼容平台
 - **模块化设计**：各功能模块相互独立，便于扩展和维护
 - **持续更新**：计划逐步添加更多常用功能模块
@@ -161,6 +162,45 @@ string decrypted = aes.Decrypt(encrypted, key);
 Console.WriteLine($"解密后: {decrypted}");
 ```
 
+### JavaScript执行示例
+
+```csharp
+using WodToolkit.Script;
+
+// 创建Node.js执行器（默认在系统PATH中查找node）
+var nodeRunner = new NodeJsRunner();
+
+// 异步执行JavaScript代码字符串
+var result = await nodeRunner.ExecuteScriptAsync(@"
+    // JavaScript代码
+    const message = 'Hello from JavaScript!';
+    console.log(message);
+    
+    // 可以使用Node.js内置模块
+    const os = require('os');
+    console.log('系统信息:', os.type());
+    
+    // 返回值通过console输出获取
+    console.log('执行成功!');
+");
+
+// 检查执行结果
+if (result.Success)
+{
+    Console.WriteLine($"JavaScript输出: {result.Output}");
+}
+else
+{
+    Console.WriteLine($"JavaScript执行失败: {result.Error}");
+}
+
+// 同步执行JavaScript文件
+// var fileResult = nodeRunner.ExecuteScriptFile("path/to/script.js");
+
+// 使用完毕后释放资源
+nodeRunner.Dispose();
+```
+
 ## 项目结构
 
 ```
@@ -169,6 +209,7 @@ Console.WriteLine($"解密后: {decrypted}");
 │   ├── Encode/         # 加密相关功能
 │   ├── Http/           # HTTP相关功能
 │   ├── Json/           # JSON处理功能
+│   ├── Script/         # JavaScript执行功能
 │   └── Thread/         # 线程管理功能
 ├── WodToolkit.csproj   # 项目文件
 └── README.md           # 项目文档
