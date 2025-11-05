@@ -92,20 +92,27 @@ Console.WriteLine("所有任务执行完毕");
 ### HTTP请求示例
 
 ```csharp
-using WodToolKit.Http;
+using WodToolkit.Http;
 
-// 创建HTTP客户端
-var httpClient = new HttpClient();
+// 创建HTTP请求实例
+var httpRequest = new HttpRequestClass();
 
 // 发送GET请求
-var response = await httpClient.GetAsync("https://api.example.com/data");
+httpRequest.Open("https://api.example.com/data", HttpMethod.Get).Send();
+
+// 获取响应数据
+var responseData = httpRequest.GetResponse();
 
 // 处理响应
-if (response.IsSuccessStatusCode)
+if (responseData.StatusCode == 200)
 {
-    var content = await response.Content.ReadAsStringAsync();
-    Console.WriteLine(content);
+    Console.WriteLine(responseData.Body);
 }
+
+// 异步发送请求示例
+var httpRequestAsync = new HttpRequestClass();
+await httpRequestAsync.Open("https://api.example.com/data", HttpMethod.Get).SendAsync();
+var responseDataAsync = httpRequestAsync.GetResponse();
 ```
 
 ### Cookie管理示例

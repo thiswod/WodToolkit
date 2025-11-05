@@ -92,20 +92,27 @@ Console.WriteLine("All tasks completed");
 ### HTTP Request Example
 
 ```csharp
-using WodToolKit.Http;
+using WodToolkit.Http;
 
-// Create HTTP client
-var httpClient = new HttpClient();
+// Create HTTP request instance
+var httpRequest = new HttpRequestClass();
 
 // Send GET request
-var response = await httpClient.GetAsync("https://api.example.com/data");
+httpRequest.Open("https://api.example.com/data", HttpMethod.Get).Send();
+
+// Get response data
+var responseData = httpRequest.GetResponse();
 
 // Process response
-if (response.IsSuccessStatusCode)
+if (responseData.StatusCode == 200)
 {
-    var content = await response.Content.ReadAsStringAsync();
-    Console.WriteLine(content);
+    Console.WriteLine(responseData.Body);
 }
+
+// Asynchronous request example
+var httpRequestAsync = new HttpRequestClass();
+await httpRequestAsync.Open("https://api.example.com/data", HttpMethod.Get).SendAsync();
+var responseDataAsync = httpRequestAsync.GetResponse();
 ```
 
 ### Cookie Management Example
