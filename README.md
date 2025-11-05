@@ -9,6 +9,8 @@
 - **JSON解析**：灵活的JSON序列化和反序列化，支持动态类型和自定义类型
 - **URL工具**：URL参数处理、排序和转换工具
 - **AES加密**：安全的AES加密和解密功能，支持多种加密模式和填充方式
+- **内存缓存**：基于内存的临时缓存实现，支持TTL设置和自动清理
+- **线程池管理**：简单高效的线程池实现，支持任务队列和任务等待
 - **.NET Standard 2.1兼容**：支持.NET Core、.NET Framework和其他兼容平台
 - **模块化设计**：各功能模块相互独立，便于扩展和维护
 - **持续更新**：计划逐步添加更多常用功能模块
@@ -28,6 +30,61 @@ dotnet add package WodToolKit
 ```
 
 ## 快速开始
+
+### 内存缓存示例
+
+```csharp
+using WodToolkit.src.Cache;
+
+// 创建临时缓存实例（每30秒清理一次，默认TTL为300秒）
+var cache = new TempCache<string, string>(TimeSpan.FromSeconds(30), 300);
+
+// 设置缓存项
+cache.Set("key1", "value1");
+cache.Set("key2", "value2", 60); // 自定义TTL为60秒
+
+// 获取缓存项
+if (cache.TryGetValue("key1", out string value))
+{
+    Console.WriteLine($"缓存值: {value}");
+}
+
+// 移除缓存项
+cache.Remove("key2");
+
+// 清空缓存
+// cache.Clear();
+
+// 使用完毕后释放资源
+// cache.Dispose();
+```
+
+### 线程池使用示例
+
+```csharp
+using WodToolkit.src.Thread;
+
+// 创建线程池（4个工作线程）
+var threadPool = new SimpleThreadPool(4);
+
+// 添加任务到线程池
+for (int i = 0; i < 10; i++)
+{
+    int taskId = i;
+    threadPool.QueueTask(() => {
+        Console.WriteLine($"执行任务 {taskId}, 线程ID: {System.Threading.Thread.CurrentThread.ManagedThreadId}");
+        System.Threading.Thread.Sleep(100); // 模拟工作
+    });
+}
+
+// 等待所有任务完成
+threadPool.Wait();
+
+// 释放线程池资源
+threadPool.Dispose();
+
+Console.WriteLine("所有任务执行完毕");
+```
 
 ### HTTP请求示例
 
@@ -108,9 +165,11 @@ Console.WriteLine($"解密后: {decrypted}");
 
 ```
 ├── src/
+│   ├── Cache/          # 缓存相关功能
 │   ├── Encode/         # 加密相关功能
 │   ├── Http/           # HTTP相关功能
-│   └── Json/           # JSON处理功能
+│   ├── Json/           # JSON处理功能
+│   └── Thread/         # 线程管理功能
 ├── WodToolkit.csproj   # 项目文件
 └── README.md           # 项目文档
 ```
