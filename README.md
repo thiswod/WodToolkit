@@ -11,7 +11,7 @@
 - **AES加密**：安全的AES加密和解密功能，支持多种加密模式和填充方式
 - **内存缓存**：基于内存的临时缓存实现，支持TTL设置和自动清理
 - **线程池管理**：简单高效的线程池实现，支持任务队列和任务等待
-- **JavaScript执行**：通过Node.js执行JavaScript代码，支持代码字符串和文件执行
+- **JavaScript执行**：通过Node.js执行JavaScript代码，支持代码字符串和文件执行，以及调用特定方法并传递参数
 - **.NET Standard 2.1兼容**：支持.NET Core、.NET Framework和其他兼容平台
 - **模块化设计**：各功能模块相互独立，便于扩展和维护
 - **持续更新**：计划逐步添加更多常用功能模块
@@ -162,43 +162,113 @@ string decrypted = aes.Decrypt(encrypted, key);
 Console.WriteLine($"解密后: {decrypted}");
 ```
 
-### JavaScript执行示例
+### JavaScript执行与方法调用示例
 
 ```csharp
-using WodToolkit.Script;
+using WodToolKit.Script;
 
 // 创建Node.js执行器（默认在系统PATH中查找node）
-var nodeRunner = new NodeJsRunner();
-
-// 异步执行JavaScript代码字符串
-var result = await nodeRunner.ExecuteScriptAsync(@"
-    // JavaScript代码
-    const message = 'Hello from JavaScript!';
-    console.log(message);
-    
-    // 可以使用Node.js内置模块
-    const os = require('os');
-    console.log('系统信息:', os.type());
-    
-    // 返回值通过console输出获取
-    console.log('执行成功!');
-");
-
-// 检查执行结果
-if (result.Success)
+using (var nodeRunner = new NodeJsRunner())
 {
-    Console.WriteLine($"JavaScript输出: {result.Output}");
-}
-else
-{
-    Console.WriteLine($"JavaScript执行失败: {result.Error}");
+    // 1. 基本的JavaScript代码执行
+    var result = await nodeRunner.ExecuteScriptAsync(@"
+        function test() {
+            console.log('Hello from JavaScript!');
+            return 42;
+        }
+        
+        test();");
+    
+    Console.WriteLine($"成功: {result.Success}");
+    Console.WriteLine($"输出: {result.Output}");
+    
+    // 2. 调用JavaScript文件中的方法
+    var addResult = await nodeRunner.CallMethodAsync("./test_script.js", "add", 5, 3);
+    if (addResult.Success)
+    {
+        // 解析返回结果
+        int sum = nodeRunner.GetResult<int>(addResult);
+        Console.WriteLine($"5 + 3 = {sum}");
+    }
+    
+    // 3. 传递对象参数
+    var user = new {
+        firstName = "John",
+        lastName = "Doe",
+        email = "john@example.com",
+        age = 25
+    };
+    
+    var userResult = await nodeRunner.CallMethodAsync("./test_script.js", "processUser", user);
+    if (userResult.Success)
+    {
+        // 动态类型解析结果
+        dynamic processedUser = nodeRunner.GetResult<dynamic>(userResult);
+        Console.WriteLine($"全名: {processedUser.fullName}");
+        Console.WriteLine($"邮箱: {processedUser.email}");
+        Console.WriteLine($"是否成年: {processedUser.isAdult}");
+    }
+    
+    // 4. 从代码字符串中调用方法
+    string scriptCode = @"
+        function multiply(a, b) {
+            return a * b;
+        }
+        
+        module.exports = { multiply };
+    ";
+    
+    var multiplyResult = await nodeRunner.CallMethodFromScriptAsync(scriptCode, "multiply", 7, 8);
+    if (multiplyResult.Success)
+    {
+        int product = nodeRunner.GetResult<int>(multiplyResult);
+        Console.WriteLine($"7 * 8 = {product}");
+    }
+    
+    // 5. 调用异步函数
+    var asyncResult = await nodeRunner.CallMethodAsync("./test_script.js", "fetchData", 123);
+    if (asyncResult.Success)
+    {
+        dynamic data = nodeRunner.GetResult<dynamic>(asyncResult);
+        Console.WriteLine($"ID: {data.id}");
+        Console.WriteLine($"名称: {data.name}");
+    }
 }
 
-// 同步执行JavaScript文件
-// var fileResult = nodeRunner.ExecuteScriptFile("path/to/script.js");
+/*
+JavaScript文件示例（test_script.js）：
 
-// 使用完毕后释放资源
-nodeRunner.Dispose();
+// 简单的加法函数
+function add(a, b) {
+    return a + b;
+}
+
+// 对象处理函数
+function processUser(user) {
+    return {
+        fullName: `${user.firstName} ${user.lastName}`,
+        email: user.email,
+        isAdult: user.age >= 18
+    };
+}
+
+// 异步函数
+async function fetchData(id) {
+    await new Promise(resolve => setTimeout(resolve, 300));
+    return {
+        id: id,
+        name: `Item ${id}`,
+        status: 'active'
+    };
+}
+
+// 导出函数
+module.exports = {
+    add,
+    processUser,
+    fetchData
+};
+*/
 ```
 
 ## 项目结构
@@ -209,7 +279,7 @@ nodeRunner.Dispose();
 │   ├── Encode/         # 加密相关功能
 │   ├── Http/           # HTTP相关功能
 │   ├── Json/           # JSON处理功能
-│   ├── Script/         # JavaScript执行功能
+│   ├── Script/         # JavaScript执行和方法调用功能
 │   └── Thread/         # 线程管理功能
 ├── WodToolkit.csproj   # 项目文件
 └── README.md           # 项目文档

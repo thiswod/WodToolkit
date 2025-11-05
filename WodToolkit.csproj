@@ -6,21 +6,24 @@
     <PackAsTool>False</PackAsTool>
     <!-- NuGet包元数据 -->
     <PackageId>WodToolKit</PackageId>
-    <Version>1.0.0.3</Version>
+    <Version>1.0.0.4</Version>
     <Title>WodToolKit - 轻量级.NET工具库</Title>
     <Authors>Wod</Authors>
     <Company>Wod</Company>
-    <Description>WodToolKit是一个功能丰富的轻量级.NET综合工具库，旨在封装各类常用功能，简化开发工作，提高开发效率。该库采用.NET Standard 2.1标准，确保在各种.NET平台上的广泛兼容性，目前已实现HTTP请求处理、Cookie管理、JSON解析、AES加密、内存缓存、线程池管理和JavaScript执行等功能，未来将持续扩展更多实用工具模块。</Description>
-    <Summary>轻量级.NET综合工具库，提供各类常用功能封装，目前包含HTTP、Cookie、JSON处理、AES加密、内存缓存、线程池管理和JavaScript执行模块。</Summary>
+    <Description>WodToolKit是一个功能丰富的轻量级.NET综合工具库，旨在封装各类常用功能，简化开发工作，提高开发效率。该库采用.NET Standard 2.1标准，确保在各种.NET平台上的广泛兼容性，目前已实现HTTP请求处理、Cookie管理、JSON解析、AES加密、内存缓存、线程池管理和增强的JavaScript执行功能，未来将持续扩展更多实用工具模块。</Description>
+    <Summary>轻量级.NET综合工具库，提供各类常用功能封装，目前包含HTTP、Cookie、JSON处理、AES加密、内存缓存、线程池管理和JavaScript方法调用执行模块。</Summary>
     <PackageProjectUrl>https://github.com/thiswod/WodToolKit</PackageProjectUrl>
     <RepositoryUrl>https://github.com/thiswod/WodToolKit</RepositoryUrl>
     <RepositoryType>Git</RepositoryType>
-    <PackageTags>http,json,cookie,aes,encrypt,decrypt,security,.netstandard,toolkit,web,extensions,cache,thread,threadpool,memory-cache,javascript,nodejs</PackageTags>
+    <PackageTags>http,json,cookie,aes,encrypt,decrypt,security,.netstandard,toolkit,web,extensions,cache,thread,threadpool,memory-cache,javascript,nodejs,function-call</PackageTags>
     <Copyright>© Wod. All rights reserved.</Copyright>
     <IncludeSymbols>False</IncludeSymbols>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageIcon>icon.png</PackageIcon>
     <ReleaseNotes>
+      ## 1.0.0.4
+      - 增强JavaScript执行功能，支持调用JS代码和文件中的特定方法并传递参数
+
       ## 1.0.0.3
       - 新增JavaScript执行功能
 
