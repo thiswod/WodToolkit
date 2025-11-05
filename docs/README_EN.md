@@ -324,7 +324,30 @@ module.exports = {
 */
 ```
 
-## Project Structure
+## Project Architecture and Organization
+
+WodToolKit adopts a modular design where each functional module is independent, facilitating extension and maintenance. The overall architecture revolves around core functional modules, providing a unified user experience through clear namespaces and class hierarchies.
+
+### Core Module Relationships
+
+```
+WodToolKit
+├── Http/          # HTTP request and Cookie management
+│   ├── HttpRequestClass  # HTTP client implementation
+│   └── CookieManager     # Cookie management
+├── Json/          # JSON processing
+│   └── EasyJson          # Simplified JSON serialization and deserialization
+├── Cache/         # Caching functionality
+│   └── TempCache         # Memory cache implementation
+├── Thread/        # Thread management
+│   └── SimpleThreadPool  # Thread pool implementation
+├── Encode/        # Encryption functionality
+│   └── AesCrypt          # AES encryption and decryption
+└── Script/        # Script execution
+    └── NodeJsRunner      # Node.js script executor
+```
+
+### Project Structure
 
 ```
 ├── src/
@@ -348,9 +371,64 @@ module.exports = {
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
-## Contributions
+## Issue Reporting and Contributions
 
-Issues and Pull Requests are welcome!
+### Reporting Issues
+
+We highly value your user experience. If you encounter any problems or have any suggestions during use, please provide feedback through the following methods:
+
+1. **GitHub Issues**: Create a new Issue in the project repository, detailing the problem you encountered or the feature suggestion you have
+   - Please provide detailed reproduction steps as much as possible
+   - In case of errors, please provide complete error information and stack traces
+   - Specify the WodToolKit version and environment information you are using
+
+2. **Code Contributions**
+
+   We warmly welcome community contributions! If you would like to contribute code to the project, please follow these steps:
+
+   1. **Fork the project repository**
+      - Click the "Fork" button on GitHub to create your own copy of the repository
+
+   2. **Clone the repository**
+      ```bash
+      git clone https://github.com/thiswod/WodToolKit.git
+      cd WodToolKit
+      ```
+
+   3. **Create a branch**
+      ```bash
+      git checkout -b feature/your-feature-name
+      ```
+
+   4. **Implement features or fix issues**
+      - Ensure your code style is consistent with the project
+      - Add appropriate test cases for new features
+      - Update relevant documentation
+
+   5. **Commit changes**
+      ```bash
+      git commit -m "Describe your changes"
+      ```
+
+   6. **Push to your Fork**
+      ```bash
+      git push origin feature/your-feature-name
+      ```
+
+   7. **Create a Pull Request**
+      - Navigate to the original repository on GitHub
+      - Click the "New Pull Request" button
+      - Select your branch and submit the PR
+      - Please provide a detailed description of your changes and their purpose in the PR description
+
+### Development Guidelines
+
+To maintain code quality and consistency, please follow these development guidelines:
+
+1. Code style: Follow C# standard code conventions
+2. Comments: Add appropriate XML documentation comments for public methods and classes
+3. Testing: New features should include unit tests
+4. Compatibility: Ensure code is compatible with .NET Standard 2.1
 
 ## Author
 

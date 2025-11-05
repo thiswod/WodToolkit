@@ -324,7 +324,30 @@ module.exports = {
 */
 ```
 
-## 项目结构
+## 项目架构与组织
+
+WodToolKit采用模块化设计，各功能模块相互独立，便于扩展和维护。整体架构围绕核心功能模块展开，通过清晰的命名空间和类层次结构提供统一的使用体验。
+
+### 核心模块关系
+
+```
+WodToolKit
+├── Http/          # HTTP请求与Cookie管理
+│   ├── HttpRequestClass  # HTTP客户端实现
+│   └── CookieManager     # Cookie管理
+├── Json/          # JSON处理
+│   └── EasyJson          # 简化的JSON序列化与反序列化
+├── Cache/         # 缓存功能
+│   └── TempCache         # 内存缓存实现
+├── Thread/        # 线程管理
+│   └── SimpleThreadPool  # 线程池实现
+├── Encode/        # 加密功能
+│   └── AesCrypt          # AES加密解密
+└── Script/        # 脚本执行
+    └── NodeJsRunner      # Node.js脚本执行器
+```
+
+### 项目结构
 
 ```
 ├── src/
@@ -348,9 +371,64 @@ module.exports = {
 
 本项目采用MIT许可证。详情请参阅[LICENSE](LICENSE)文件。
 
-## 贡献
+## 问题反馈与贡献
 
-欢迎提交Issue和Pull Request！
+### 问题反馈
+
+我们非常重视您的使用体验，如果您在使用过程中遇到任何问题或有任何建议，请通过以下方式反馈：
+
+1. **GitHub Issues**：在项目仓库中创建新的Issue，详细描述您遇到的问题或提出的功能建议
+   - 请尽可能提供详细的复现步骤
+   - 如遇错误，请提供完整的错误信息和堆栈跟踪
+   - 说明您使用的WodToolKit版本和环境信息
+
+2. **代码贡献**
+
+   我们非常欢迎社区贡献！如果您想要为项目贡献代码，请遵循以下步骤：
+
+   1. **Fork 项目仓库**
+      - 在GitHub上点击"Fork"按钮创建您自己的仓库副本
+
+   2. **克隆仓库**
+      ```bash
+      git clone https://github.com/thiswod/WodToolKit.git
+      cd WodToolKit
+      ```
+
+   3. **创建分支**
+      ```bash
+      git checkout -b feature/您的功能名称
+      ```
+
+   4. **实现功能或修复问题**
+      - 请确保您的代码风格与项目保持一致
+      - 为新功能添加适当的测试用例
+      - 更新相关文档
+
+   5. **提交更改**
+      ```bash
+      git commit -m "描述您的更改"
+      ```
+
+   6. **推送到您的Fork**
+      ```bash
+      git push origin feature/您的功能名称
+      ```
+
+   7. **创建Pull Request**
+      - 在GitHub上导航到原始仓库
+      - 点击"New Pull Request"按钮
+      - 选择您的分支并提交PR
+      - 请在PR描述中详细说明您的更改内容和目的
+
+### 开发规范
+
+为了保持代码质量和一致性，请遵循以下开发规范：
+
+1. 代码风格：遵循C#标准代码约定
+2. 注释：为公共方法和类添加适当的XML文档注释
+3. 测试：新功能应包含单元测试
+4. 兼容性：确保代码与.NET Standard 2.1兼容
 
 ## 作者
 
