@@ -1,5 +1,7 @@
 # WodToolKit
 
+[English Version](README_EN.md) | [中文版本](../README.md)
+
 A lightweight .NET toolkit that provides encapsulation of various common functionalities, designed to simplify development work and improve development efficiency. It has implemented HTTP request handling, Cookie management, JSON parsing, memory caching, thread pool, AES encryption, JavaScript execution, and other features.
 
 ## Features

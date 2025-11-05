@@ -1,5 +1,7 @@
 # WodToolKit
 
+[English Version](docs/README_EN.md) | 中文版本
+
 轻量级.NET工具库，提供各类常用功能的封装，旨在简化开发工作，提高开发效率。已实现HTTP请求处理、Cookie管理、JSON解析、内存缓存、线程池、AES加密、JavaScript执行等功能。
 
 ## 功能特性
