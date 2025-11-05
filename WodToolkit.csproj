@@ -20,7 +20,7 @@
     <IncludeSymbols>False</IncludeSymbols>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageIcon>icon.png</PackageIcon>
-      <PackageReadmeFile>README_EN.md</PackageReadmeFile>
+      <PackageReadmeFile>docs/README_EN.md</PackageReadmeFile>
     <ReleaseNotes>
       ## 1.0.0.4
       - 增强JavaScript执行功能，支持调用JS代码和文件中的特定方法并传递参数
@@ -65,7 +65,7 @@
   <!-- 将README.md和图标包含在NuGet包中 -->
   <ItemGroup>
     <None Include="README.md" Pack="true" PackagePath="" />
-    <None Include="README_EN.md" Pack="true" PackagePath="" />
+    <None Include="docs/README_EN.md" Pack="true" PackagePath="" />
     <None Include="icon.png" Pack="true" PackagePath="" />
   </ItemGroup>
 </Project>
