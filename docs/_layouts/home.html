@@ -4,11 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
   <meta name="format-detection" content="telephone=no">
-  <title>{% if page.title %}{{ page.title }} - {% endif %}{{ site.title }}</title>
+  <title>{{ site.title }} - {{ site.description }}</title>
   <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
   <style>
-    /* 确保 Prism 代码块使用深色主题 */
     pre[class*="language-"] {
       background: #1e293b !important;
     }
@@ -16,7 +15,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
 </head>
-<body>
+<body class="home-page">
   <header>
     <nav class="navbar">
       <div class="container">
@@ -43,34 +42,29 @@
     </nav>
   </header>
 
-  <div class="doc-container">
-    <aside class="doc-sidebar">
-      <nav class="sidebar-nav">
-        <div class="nav-group">
-          <div class="nav-group-title">快速开始</div>
-          <ul class="nav-list">
-            <li><a href="{{ '/getting-started' | relative_url }}" {% if page.url == '/getting-started/' %}class="active"{% endif %}>快速开始</a></li>
-          </ul>
+  <main>
+    <section class="hero">
+      <div class="container">
+        <div class="hero-content">
+          <div class="hero-logo">
+            <div class="logo-large">W</div>
+          </div>
+          <h1 class="hero-title">{{ site.title }}</h1>
+          <p class="hero-subtitle">{{ site.description }}</p>
+          <div class="hero-actions">
+            <a href="{{ '/getting-started' | relative_url }}" class="btn btn-primary">开始使用</a>
+            <a href="https://github.com/thiswod/WodToolKit" target="_blank" class="btn btn-outline">GitHub</a>
+          </div>
         </div>
-        <div class="nav-group">
-          <div class="nav-group-title">核心功能</div>
-          <ul class="nav-list">
-            <li><a href="{{ '/http' | relative_url }}" {% if page.url == '/http/' %}class="active"{% endif %}>HTTP请求</a></li>
-            <li><a href="{{ '/javascript' | relative_url }}" {% if page.url == '/javascript/' %}class="active"{% endif %}>JavaScript</a></li>
-            <li><a href="{{ '/cache' | relative_url }}" {% if page.url == '/cache/' %}class="active"{% endif %}>缓存</a></li>
-            <li><a href="{{ '/cookie' | relative_url }}" {% if page.url == '/cookie/' %}class="active"{% endif %}>Cookie管理</a></li>
-            <li><a href="{{ '/json' | relative_url }}" {% if page.url == '/json/' %}class="active"{% endif %}>JSON解析</a></li>
-          </ul>
-        </div>
-      </nav>
-    </aside>
+      </div>
+    </section>
 
-    <main class="doc-content">
-      <div class="doc-content-inner">
+    <section class="features-section">
+      <div class="container">
         {{ content }}
       </div>
-    </main>
-  </div>
+    </section>
+  </main>
 
   <footer>
     <div class="container">
@@ -87,7 +81,6 @@
     (function() {
       const menuToggle = document.querySelector('.menu-toggle');
       const navMenu = document.getElementById('navMenu');
-      const sidebar = document.querySelector('.doc-sidebar');
       
       if (menuToggle && navMenu) {
         menuToggle.addEventListener('click', function() {
@@ -95,12 +88,8 @@
           menuToggle.setAttribute('aria-expanded', !isExpanded);
           navMenu.classList.toggle('active');
           menuToggle.classList.toggle('active');
-          if (sidebar) {
-            sidebar.classList.toggle('active');
-          }
         });
 
-        // 点击菜单项后关闭移动端菜单
         const navLinks = navMenu.querySelectorAll('a');
         navLinks.forEach(function(link) {
           link.addEventListener('click', function() {
@@ -108,45 +97,20 @@
               navMenu.classList.remove('active');
               menuToggle.classList.remove('active');
               menuToggle.setAttribute('aria-expanded', 'false');
-              if (sidebar) {
-                sidebar.classList.remove('active');
-              }
             }
           });
         });
 
-        // 点击外部区域关闭菜单
         document.addEventListener('click', function(event) {
           if (window.innerWidth <= 768) {
             const isClickInsideNav = navMenu.contains(event.target) || menuToggle.contains(event.target);
-            const isClickInsideSidebar = sidebar && sidebar.contains(event.target);
-            if (!isClickInsideNav && !isClickInsideSidebar) {
-              if (navMenu.classList.contains('active')) {
-                navMenu.classList.remove('active');
-                menuToggle.classList.remove('active');
-                menuToggle.setAttribute('aria-expanded', 'false');
-              }
-              if (sidebar && sidebar.classList.contains('active')) {
-                sidebar.classList.remove('active');
-              }
+            if (!isClickInsideNav && navMenu.classList.contains('active')) {
+              navMenu.classList.remove('active');
+              menuToggle.classList.remove('active');
+              menuToggle.setAttribute('aria-expanded', 'false');
             }
           }
         });
-      }
-
-      // 侧边栏切换按钮（移动端）
-      if (sidebar) {
-        const sidebarToggle = document.createElement('button');
-        sidebarToggle.className = 'sidebar-toggle';
-        sidebarToggle.innerHTML = '<span></span><span></span><span></span>';
-        sidebarToggle.setAttribute('aria-label', '切换侧边栏');
-        sidebarToggle.addEventListener('click', function() {
-          sidebar.classList.toggle('active');
-        });
-        const docContent = document.querySelector('.doc-content');
-        if (docContent) {
-          docContent.insertBefore(sidebarToggle, docContent.firstChild);
-        }
       }
     })();
   </script>

@@ -9,6 +9,10 @@ defaults:
       path: ""
     values:
       layout: default
+  - scope:
+      path: "index.md"
+    values:
+      layout: home
 
 # 排除文件
 exclude:
