@@ -422,28 +422,60 @@ footer a {
   }
 
   .doc-sidebar {
-    width: 100%;
+    width: 280px;
+    max-width: 85%;
     position: fixed;
     top: 73px;
     left: -100%;
-    z-index: 98;
+    z-index: 100;
     height: calc(100vh - 73px);
     transition: left 0.3s ease;
-    border-right: none;
-    border-bottom: 1px solid var(--border-color);
+    border-right: 1px solid var(--border-color);
+    box-shadow: 2px 0 20px rgba(0,0,0,0.3);
   }
 
   .doc-sidebar.active {
     left: 0;
   }
 
+  /* 侧边栏遮罩层 */
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 73px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 99;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .sidebar-overlay.active {
+    display: block;
+    opacity: 1;
+  }
+
   .doc-content {
     padding: 1.5rem 1rem;
     width: 100%;
+    position: relative;
+    z-index: 1;
   }
 
   .sidebar-toggle {
     display: flex;
+    position: fixed;
+    top: 85px;
+    left: 15px;
+    z-index: 101;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 0.5rem;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
   }
 
   /* Hero Responsive */
@@ -1191,8 +1223,8 @@ blockquote {
   display: none;
   position: fixed;
   top: 85px;
-  left: 20px;
-  z-index: 99;
+  left: 15px;
+  z-index: 101;
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
   border-radius: 6px;
@@ -1200,6 +1232,13 @@ blockquote {
   cursor: pointer;
   flex-direction: column;
   gap: 0.25rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  transition: all 0.3s ease;
+}
+
+.sidebar-toggle:hover {
+  background: var(--hover-bg);
+  border-color: var(--primary-color);
 }
 
 .sidebar-toggle span {
