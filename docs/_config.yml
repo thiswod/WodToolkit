@@ -40,21 +40,12 @@ navigation:
 author: Wod
 github_username: thiswod
 
-# 排除文件
+# 排除文件（只排除 docs 目录内的文件）
 exclude:
   - Gemfile
   - Gemfile.lock
   - node_modules
-  - vendor/bundle/
-  - vendor/cache/
-  - vendor/gems/
-  - vendor/ruby/
+  - vendor/
   - README_EN.md
-  - ../bin/
-  - ../obj/
-  - ../.vs/
-  - ../.vscode/
-  - ../src/
-  - ../WodToolkit.csproj
-  - ../WodToolkit.sln
+  - test.md
 
