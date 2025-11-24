@@ -97,7 +97,7 @@ using (var jintRunner = new JintRunner())
 
 ## 下一步
 
-- [HTTP 请求文档](/WodToolkit/http)
-- [JavaScript 执行文档](/WodToolkit/javascript)
-- [缓存使用文档](/WodToolkit/cache)
+- [HTTP 请求文档]({{ '/http' | relative_url }})
+- [JavaScript 执行文档]({{ '/javascript' | relative_url }})
+- [缓存使用文档]({{ '/cache' | relative_url }})
 
