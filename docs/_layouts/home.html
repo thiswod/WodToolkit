@@ -19,17 +19,15 @@
   <header>
     <nav class="navbar">
       <div class="container">
-        <div class="nav-header">
-          <a href="{{ '/' | relative_url }}" class="logo">
-            <span class="logo-icon">W</span>
-            <span class="logo-text">{{ site.title }}</span>
-          </a>
-          <button class="menu-toggle" aria-label="切换菜单" aria-expanded="false">
-            <span></span>
-            <span></span>
-            <span></span>
-          </button>
-        </div>
+        <a href="{{ '/' | relative_url }}" class="logo">
+          <span class="logo-icon">W</span>
+          <span class="logo-text">{{ site.title }}</span>
+        </a>
+        <button class="menu-toggle" aria-label="切换菜单" aria-expanded="false">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
         <ul class="nav-menu" id="navMenu">
           <li><a href="{{ '/' | relative_url }}">首页</a></li>
           <li><a href="{{ '/getting-started' | relative_url }}">快速开始</a></li>
