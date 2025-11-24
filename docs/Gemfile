@@ -1,7 +1,6 @@
 source "https://rubygems.org"
 
-gem "jekyll", "~> 4.3"
-gem "jekyll-feed", "~> 0.12"
-gem "jekyll-sitemap", "~> 1.4"
-gem "jekyll-seo-tag", "~> 2.8"
+# GitHub Pages 会自动安装这些插件，不需要在这里指定
+# 如果需要本地测试，可以取消注释
+# gem "github-pages", group: :jekyll_plugins
 
