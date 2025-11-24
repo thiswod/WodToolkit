@@ -13,7 +13,7 @@
 - **AES加密**：安全的AES加密和解密功能，支持多种加密模式和填充方式
 - **内存缓存**：基于内存的临时缓存实现，支持TTL设置和自动清理
 - **线程池管理**：简单高效的线程池实现，支持任务队列和任务等待
-- **JavaScript执行**：通过Node.js执行JavaScript代码，支持代码字符串和文件执行，以及调用特定方法并传递参数
+- **JavaScript执行**：支持两种执行方式，JintRunner（纯.NET实现，无需Node.js）和NodeJsRunner（需要Node.js），支持代码字符串和文件执行，以及调用特定方法并传递参数
 - **.NET Standard 2.1兼容**：支持.NET Core、.NET Framework和其他兼容平台
 - **模块化设计**：各功能模块相互独立，便于扩展和维护
 - **持续更新**：计划逐步添加更多常用功能模块
@@ -251,49 +251,38 @@ Console.WriteLine($"解密后: {decrypted}");
 
 ### JavaScript执行与方法调用示例
 
-```csharp
-using WodToolKit.Script;
+WodToolKit 提供了两种 JavaScript 执行器：`NodeJsRunner`（需要 Node.js）和 `JintRunner`（纯 .NET 实现，无需 Node.js）。
 
-// 创建Node.js执行器（默认在系统PATH中查找node）
-using (var nodeRunner = new NodeJsRunner())
+#### 方式一：使用 JintRunner（推荐，无需 Node.js）
+
+```csharp
+using WodToolkit.Script;
+
+// 创建 Jint 执行器（纯 .NET 实现，无需安装 Node.js）
+using (var jintRunner = new JintRunner())
 {
     // 1. 基本的JavaScript代码执行
-    var result = await nodeRunner.ExecuteScriptAsync(@"
+    var result = await jintRunner.ExecuteScriptAsync(@"
         function test() {
-            console.log('Hello from JavaScript!');
+            console.log('Hello from Jint!');
             return 42;
         }
         
         test();");
     
     Console.WriteLine($"成功: {result.Success}");
-    Console.WriteLine($"输出: {result.Output}");
+    Console.WriteLine($"输出: {result.Output}"); // 输出: Hello from Jint!
     
-    // 2. 调用JavaScript文件中的方法
-    var addResult = await nodeRunner.CallMethodAsync("./test_script.js", "add", 5, 3);
+    // 2. 执行 JavaScript 文件
+    var fileResult = await jintRunner.ExecuteScriptFileAsync("./test_script.js");
+    Console.WriteLine($"文件执行结果: {fileResult.Output}");
+    
+    // 3. 调用 JavaScript 文件中的方法
+    var addResult = await jintRunner.CallMethodAsync("./test_script.js", "add", 5, 3);
     if (addResult.Success)
     {
-        // 解析返回结果
-        int sum = nodeRunner.GetResult<int>(addResult);
-        Console.WriteLine($"5 + 3 = {sum}");
-    }
-    
-    // 3. 传递对象参数
-    var user = new {
-        firstName = "John",
-        lastName = "Doe",
-        email = "john@example.com",
-        age = 25
-    };
-    
-    var userResult = await nodeRunner.CallMethodAsync("./test_script.js", "processUser", user);
-    if (userResult.Success)
-    {
-        // 动态类型解析结果
-        dynamic processedUser = nodeRunner.GetResult<dynamic>(userResult);
-        Console.WriteLine($"全名: {processedUser.fullName}");
-        Console.WriteLine($"邮箱: {processedUser.email}");
-        Console.WriteLine($"是否成年: {processedUser.isAdult}");
+        int sum = jintRunner.GetResult<int>(addResult);
+        Console.WriteLine($"5 + 3 = {sum}"); // 输出: 8
     }
     
     // 4. 从代码字符串中调用方法
@@ -305,14 +294,94 @@ using (var nodeRunner = new NodeJsRunner())
         module.exports = { multiply };
     ";
     
-    var multiplyResult = await nodeRunner.CallMethodFromScriptAsync(scriptCode, "multiply", 7, 8);
+    var multiplyResult = await jintRunner.CallMethodFromScriptAsync(scriptCode, "multiply", 7, 8);
     if (multiplyResult.Success)
     {
-        int product = nodeRunner.GetResult<int>(multiplyResult);
-        Console.WriteLine($"7 * 8 = {product}");
+        int product = jintRunner.GetResult<int>(multiplyResult);
+        Console.WriteLine($"7 * 8 = {product}"); // 输出: 56
     }
     
-    // 5. 调用异步函数
+    // 5. 传递复杂对象参数
+    var user = new {
+        firstName = "John",
+        lastName = "Doe",
+        email = "john@example.com",
+        age = 25
+    };
+    
+    var userResult = await jintRunner.CallMethodAsync("./test_script.js", "processUser", user);
+    if (userResult.Success)
+    {
+        dynamic processedUser = jintRunner.GetResult<dynamic>(userResult);
+        Console.WriteLine($"全名: {processedUser.fullName}"); // 输出: John Doe
+        Console.WriteLine($"邮箱: {processedUser.email}");
+        Console.WriteLine($"是否成年: {processedUser.isAdult}"); // 输出: true
+    }
+    
+    // 6. 处理数组和集合
+    var numbers = new int[] { 1, 2, 3, 4, 5 };
+    var sumResult = await jintRunner.CallMethodFromScriptAsync(@"
+        function sumArray(arr) {
+            return arr.reduce((a, b) => a + b, 0);
+        }
+        module.exports = { sumArray };
+    ", "sumArray", numbers);
+    
+    if (sumResult.Success)
+    {
+        int total = jintRunner.GetResult<int>(sumResult);
+        Console.WriteLine($"数组总和: {total}"); // 输出: 15
+    }
+    
+    // 7. 同步方法调用（适用于简单场景）
+    var syncResult = jintRunner.ExecuteScript("console.log('同步执行'); 1 + 1;");
+    Console.WriteLine($"同步执行结果: {syncResult.Output}");
+    
+    // 8. 错误处理
+    var errorResult = await jintRunner.ExecuteScriptAsync("throw new Error('测试错误');");
+    if (!errorResult.Success)
+    {
+        Console.WriteLine($"执行失败: {errorResult.Error}");
+    }
+}
+```
+
+#### 方式二：使用 NodeJsRunner（需要安装 Node.js）
+
+```csharp
+using WodToolkit.Script;
+
+// 创建 Node.js 执行器（需要系统已安装 Node.js）
+using (var nodeRunner = new NodeJsRunner())
+{
+    // 检查 Node.js 是否可用
+    if (!nodeRunner.IsNodeAvailable())
+    {
+        Console.WriteLine("Node.js 未安装或不可用");
+        return;
+    }
+    
+    // 1. 基本的JavaScript代码执行
+    var result = await nodeRunner.ExecuteScriptAsync(@"
+        function test() {
+            console.log('Hello from Node.js!');
+            return 42;
+        }
+        
+        test();");
+    
+    Console.WriteLine($"成功: {result.Success}");
+    Console.WriteLine($"输出: {result.Output}");
+    
+    // 2. 调用 JavaScript 文件中的方法
+    var addResult = await nodeRunner.CallMethodAsync("./test_script.js", "add", 5, 3);
+    if (addResult.Success)
+    {
+        int sum = nodeRunner.GetResult<int>(addResult);
+        Console.WriteLine($"5 + 3 = {sum}");
+    }
+    
+    // 3. 调用异步函数（Node.js 支持完整的 async/await）
     var asyncResult = await nodeRunner.CallMethodAsync("./test_script.js", "fetchData", 123);
     if (asyncResult.Success)
     {
@@ -321,10 +390,11 @@ using (var nodeRunner = new NodeJsRunner())
         Console.WriteLine($"名称: {data.name}");
     }
 }
+```
 
-/*
-JavaScript文件示例（test_script.js）：
+#### JavaScript 文件示例（test_script.js）
 
+```javascript
 // 简单的加法函数
 function add(a, b) {
     return a + b;
@@ -339,7 +409,17 @@ function processUser(user) {
     };
 }
 
-// 异步函数
+// 数组处理函数
+function sumArray(arr) {
+    return arr.reduce((a, b) => a + b, 0);
+}
+
+// 字符串处理函数
+function formatMessage(name, age) {
+    return `姓名: ${name}, 年龄: ${age}`;
+}
+
+// 异步函数（Node.js 支持）
 async function fetchData(id) {
     await new Promise(resolve => setTimeout(resolve, 300));
     return {
@@ -349,14 +429,21 @@ async function fetchData(id) {
     };
 }
 
-// 导出函数
+// 导出函数（CommonJS 格式）
 module.exports = {
     add,
     processUser,
+    sumArray,
+    formatMessage,
     fetchData
 };
-*/
 ```
+
+#### 使用建议
+
+- **推荐使用 JintRunner**：无需安装 Node.js，性能更好，集成更方便
+- **使用 NodeJsRunner**：当需要完整的 Node.js 生态系统支持时（如 npm 包、Node.js API 等）
+- **两种执行器 API 完全兼容**：可以轻松切换，无需修改调用代码
 
 ## 项目架构与组织
 
