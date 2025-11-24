@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
@@ -14,6 +15,26 @@ using System.Threading.Tasks;
 
 namespace WodToolkit.Http
 {
+    #region 代理类型枚举
+    /// <summary>
+    /// 代理类型枚举
+    /// </summary>
+    public enum ProxyType
+    {
+        /// <summary>
+        /// HTTP/HTTPS 代理
+        /// </summary>
+        Http,
+        /// <summary>
+        /// SOCKS4 代理
+        /// </summary>
+        Socks4,
+        /// <summary>
+        /// SOCKS5 代理
+        /// </summary>
+        Socks5
+    }
+    #endregion
     #region Cookie 管理器
     /// <summary>
     /// Cookie 管理器（完整实现）
@@ -316,6 +337,10 @@ namespace WodToolkit.Http
         /// </summary>
         public string Proxy { get; set; }
         /// <summary>
+        /// 代理类型（默认 HTTP）
+        /// </summary>
+        public ProxyType ProxyType { get; set; } = ProxyType.Http;
+        /// <summary>
         /// 代理服务器用户名
         /// </summary>
         public string ProxyUsername { get; set; }
@@ -441,11 +466,46 @@ namespace WodToolkit.Http
         }
 
         /// <summary>
-        /// 设置代理
+        /// 设置代理（HTTP/HTTPS 代理）
         /// </summary>
         public HttpRequestClass SetProxy(string ip = "", string user = "", string pwd = "")
         {
             _requestParams.Proxy = ip;
+            _requestParams.ProxyType = ProxyType.Http;
+            _requestParams.ProxyUsername = user;
+            _requestParams.ProxyPassword = pwd;
+            return this;
+        }
+        /// <summary>
+        /// 设置代理（支持 HTTP/HTTPS、SOCKS4 和 SOCKS5）
+        /// </summary>
+        /// <param name="proxyType">代理类型（Http、Socks4 或 Socks5）</param>
+        /// <param name="host">代理服务器地址（不含协议前缀）</param>
+        /// <param name="port">代理服务器端口</param>
+        /// <param name="user">代理用户名（可选，HTTP 和 SOCKS5 支持）</param>
+        /// <param name="pwd">代理密码（可选，HTTP 和 SOCKS5 支持）</param>
+        /// <returns>当前 HttpRequestClass 实例（用于链式调用）</returns>
+        public HttpRequestClass SetProxy(ProxyType proxyType, string host, int port, string user = "", string pwd = "")
+        {
+            if (string.IsNullOrEmpty(host))
+            {
+                throw new ArgumentException("代理服务器地址不能为空", nameof(host));
+            }
+
+            _requestParams.ProxyType = proxyType;
+
+            // 根据代理类型设置代理地址格式
+            if (proxyType == ProxyType.Http)
+            {
+                // HTTP 代理需要完整的 URL 格式
+                _requestParams.Proxy = $"http://{host}:{port}";
+            }
+            else
+            {
+                // SOCKS 代理使用 host:port 格式
+                _requestParams.Proxy = $"{host}:{port}";
+            }
+
             _requestParams.ProxyUsername = user;
             _requestParams.ProxyPassword = pwd;
             return this;
@@ -528,22 +588,32 @@ namespace WodToolkit.Http
                 _responseData = new HttpResponseData();
                 _responseData.CookieManager = _requestParams.CookieManager;
 
-                // 创建HTTP处理程序
-                using var handler = new HttpClientHandler();
-                ConfigureHandler(handler);
-
-                // 创建HTTP客户端
-                using var client = new HttpClient(handler);
-                ConfigureClient(client);  // 配置客户端参数（超时、UA等）
-
                 // 创建请求消息
                 var request = CreateRequest();
 
                 // 设置请求内容（智能处理普通数据和文件上传）
                 SetRequestContent(request, data);
 
-                // 执行请求并处理响应
-                return ExecuteRequest(client, request);
+                // 检查是否使用 SOCKS 代理
+                if (!string.IsNullOrEmpty(_requestParams.Proxy) && 
+                    (_requestParams.ProxyType == ProxyType.Socks4 || _requestParams.ProxyType == ProxyType.Socks5))
+                {
+                    // 使用 SOCKS 代理
+                    return ExecuteRequestWithSocks(request, data);
+                }
+                else
+                {
+                    // 使用标准 HTTP 代理或直连
+                    using var handler = new HttpClientHandler();
+                    ConfigureHandler(handler);
+
+                    // 创建HTTP客户端
+                    using var client = new HttpClient(handler);
+                    ConfigureClient(client);  // 配置客户端参数（超时、UA等）
+
+                    // 执行请求并处理响应
+                    return ExecuteRequest(client, request);
+                }
             }
             finally
             {
@@ -559,6 +629,38 @@ namespace WodToolkit.Http
                     file.FileStream?.Dispose();
                 }
                 _requestParams.Files.Clear();
+            }
+        }
+
+        /// <summary>
+        /// 使用 SOCKS 代理执行请求
+        /// </summary>
+        private HttpRequestClass ExecuteRequestWithSocks(HttpRequestMessage request, object data)
+        {
+            try
+            {
+                // 解析代理地址
+                var proxyUri = new Uri(_requestParams.Proxy);
+                var proxyHost = proxyUri.Host;
+                var proxyPort = proxyUri.Port > 0 ? proxyUri.Port : (_requestParams.ProxyType == ProxyType.Socks5 ? 1080 : 1080);
+
+                // 创建 SOCKS Handler
+                using var handler = new SocksHttpMessageHandler(
+                    proxyHost, proxyPort, _requestParams.ProxyType,
+                    _requestParams.ProxyUsername, _requestParams.ProxyPassword,
+                    _requestParams.FollowLocation, _requestParams.SslVerifyPeer);
+
+                // 创建 HTTP 客户端
+                using var client = new HttpClient(handler);
+                ConfigureClient(client);
+
+                // 执行请求
+                return ExecuteRequest(client, request);
+            }
+            catch (Exception ex)
+            {
+                CreateErrorResponse(ex);
+                return this;
             }
         }
 
@@ -1218,6 +1320,7 @@ namespace WodToolkit.Http
                 Headers = _requestParams.Headers,
                 Timeout = _requestParams.Timeout,
                 Proxy = _requestParams.Proxy,
+                ProxyType = _requestParams.ProxyType,
                 ProxyUsername = _requestParams.ProxyUsername,
                 ProxyPassword = _requestParams.ProxyPassword,
                 FollowLocation = _requestParams.FollowLocation,
@@ -1289,4 +1392,374 @@ namespace WodToolkit.Http
         /// </summary>
         public string ContentType { get; set; }
     }
+    #region SOCKS 代理实现
+    /// <summary>
+    /// 支持 SOCKS 代理的 HttpMessageHandler
+    /// </summary>
+    internal class SocksHttpMessageHandler : HttpMessageHandler
+    {
+        private readonly string _proxyHost;
+        private readonly int _proxyPort;
+        private readonly ProxyType _proxyType;
+        private readonly string _proxyUsername;
+        private readonly string _proxyPassword;
+        private readonly bool _allowAutoRedirect;
+        private readonly bool _sslVerifyPeer;
+
+        public SocksHttpMessageHandler(string proxyHost, int proxyPort, ProxyType proxyType,
+            string proxyUsername, string proxyPassword, bool allowAutoRedirect, bool sslVerifyPeer)
+        {
+            _proxyHost = proxyHost;
+            _proxyPort = proxyPort;
+            _proxyType = proxyType;
+            _proxyUsername = proxyUsername;
+            _proxyPassword = proxyPassword;
+            _allowAutoRedirect = allowAutoRedirect;
+            _sslVerifyPeer = sslVerifyPeer;
+        }
+
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            var uri = request.RequestUri;
+            var destinationHost = uri.Host;
+            var destinationPort = uri.Port > 0 ? uri.Port : (uri.Scheme == "https" ? 443 : 80);
+
+            // 建立 SOCKS 连接
+            Socket socket = null;
+            NetworkStream stream = null;
+            try
+            {
+                socket = SocksWebProxy.CreateSocksConnection(
+                    _proxyHost, _proxyPort, _proxyType,
+                    destinationHost, destinationPort,
+                    _proxyUsername, _proxyPassword);
+
+                stream = new NetworkStream(socket, true);
+
+                // 如果是 HTTPS，需要建立 TLS 连接
+                Stream transportStream = stream;
+                if (uri.Scheme == "https")
+                {
+                    var sslStream = new System.Net.Security.SslStream(stream, false, (sender, certificate, chain, sslPolicyErrors) =>
+                    {
+                        return !_sslVerifyPeer || sslPolicyErrors == System.Net.Security.SslPolicyErrors.None;
+                    });
+                    // .NET Standard 2.1 中 AuthenticateAsClientAsync 不接受 CancellationToken
+                    await sslStream.AuthenticateAsClientAsync(destinationHost);
+                    transportStream = sslStream;
+                }
+
+                // 构建 HTTP 请求
+                var requestBuilder = new StringBuilder();
+                requestBuilder.Append($"{request.Method} {uri.PathAndQuery} HTTP/1.1\r\n");
+                requestBuilder.Append($"Host: {destinationHost}\r\n");
+
+                // 添加请求头
+                foreach (var header in request.Headers)
+                {
+                    if (header.Key.ToLowerInvariant() == "host")
+                        continue; // 已经添加了
+                    foreach (var value in header.Value)
+                    {
+                        requestBuilder.Append($"{header.Key}: {value}\r\n");
+                    }
+                }
+
+                // 添加内容
+                if (request.Content != null)
+                {
+                    var contentHeaders = request.Content.Headers;
+                    foreach (var header in contentHeaders)
+                    {
+                        foreach (var value in header.Value)
+                        {
+                            requestBuilder.Append($"{header.Key}: {value}\r\n");
+                        }
+                    }
+                    requestBuilder.Append("\r\n");
+                    // .NET Standard 2.1 中 ReadAsByteArrayAsync 不接受 CancellationToken
+                    var contentBytes = await request.Content.ReadAsByteArrayAsync();
+                    var requestBytes = Encoding.UTF8.GetBytes(requestBuilder.ToString());
+                    await transportStream.WriteAsync(requestBytes, 0, requestBytes.Length, cancellationToken);
+                    await transportStream.WriteAsync(contentBytes, 0, contentBytes.Length, cancellationToken);
+                }
+                else
+                {
+                    requestBuilder.Append("\r\n");
+                    var requestBytes = Encoding.UTF8.GetBytes(requestBuilder.ToString());
+                    await transportStream.WriteAsync(requestBytes, 0, requestBytes.Length, cancellationToken);
+                }
+
+                // 读取响应
+                var responseBytes = new List<byte>();
+                var buffer = new byte[8192];
+                int bytesRead;
+                while ((bytesRead = await transportStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken)) > 0)
+                {
+                    responseBytes.AddRange(buffer.Take(bytesRead));
+                    // 简单的检查：如果已经读取了完整的响应头，可以尝试解析
+                    if (responseBytes.Count > 4)
+                    {
+                        var responseText = Encoding.UTF8.GetString(responseBytes.ToArray());
+                        if (responseText.Contains("\r\n\r\n"))
+                        {
+                            // 检查 Content-Length 来确定是否读取完整
+                            var headerEnd = responseText.IndexOf("\r\n\r\n");
+                            var headers = responseText.Substring(0, headerEnd);
+                            var contentLengthMatch = System.Text.RegularExpressions.Regex.Match(headers, @"Content-Length:\s*(\d+)", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+                            if (contentLengthMatch.Success)
+                            {
+                                var contentLength = int.Parse(contentLengthMatch.Groups[1].Value);
+                                var bodyStart = headerEnd + 4;
+                                if (responseBytes.Count >= bodyStart + contentLength)
+                                {
+                                    break; // 已读取完整响应
+                                }
+                            }
+                            else if (responseText.Contains("Transfer-Encoding: chunked", StringComparison.OrdinalIgnoreCase))
+                            {
+                                // 分块传输，需要特殊处理（简化实现，读取到连接关闭）
+                                // 这里简化处理，实际应该解析 chunked 编码
+                            }
+                        }
+                    }
+                }
+
+                // 解析响应
+                var responseText2 = Encoding.UTF8.GetString(responseBytes.ToArray());
+                var headerEnd2 = responseText2.IndexOf("\r\n\r\n");
+                if (headerEnd2 < 0)
+                {
+                    throw new HttpRequestException("无效的 HTTP 响应");
+                }
+
+                var statusLine = responseText2.Substring(0, responseText2.IndexOf("\r\n"));
+                var statusParts = statusLine.Split(' ');
+                var statusCode = int.Parse(statusParts[1]);
+
+                var headersText = responseText2.Substring(0, headerEnd2);
+                var bodyText = responseText2.Substring(headerEnd2 + 4);
+
+                var response = new HttpResponseMessage((HttpStatusCode)statusCode);
+                response.Content = new StringContent(bodyText, Encoding.UTF8);
+
+                // 解析响应头
+                var headerLines = headersText.Split(new[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+                for (int i = 1; i < headerLines.Length; i++)
+                {
+                    var colonIndex = headerLines[i].IndexOf(':');
+                    if (colonIndex > 0)
+                    {
+                        var headerName = headerLines[i].Substring(0, colonIndex).Trim();
+                        var headerValue = headerLines[i].Substring(colonIndex + 1).Trim();
+                        if (!response.Headers.TryAddWithoutValidation(headerName, headerValue))
+                        {
+                            response.Content.Headers.TryAddWithoutValidation(headerName, headerValue);
+                        }
+                    }
+                }
+
+                return response;
+            }
+            finally
+            {
+                stream?.Dispose();
+                socket?.Close();
+            }
+        }
+    }
+
+    /// <summary>
+    /// SOCKS 代理实现类（支持 SOCKS4 和 SOCKS5）
+    /// </summary>
+    internal class SocksWebProxy : IWebProxy
+    {
+        private readonly string _proxyHost;
+        private readonly int _proxyPort;
+        private readonly ProxyType _proxyType;
+        private readonly ICredentials _credentials;
+
+        public SocksWebProxy(string proxyHost, int proxyPort, ProxyType proxyType, ICredentials credentials = null)
+        {
+            _proxyHost = proxyHost ?? throw new ArgumentNullException(nameof(proxyHost));
+            _proxyPort = proxyPort;
+            _proxyType = proxyType;
+            _credentials = credentials;
+        }
+
+        public ICredentials Credentials
+        {
+            get => _credentials;
+            set { /* SOCKS 代理的凭据在构造时设置 */ }
+        }
+
+        public Uri GetProxy(Uri destination)
+        {
+            return new Uri($"socks://{_proxyHost}:{_proxyPort}");
+        }
+
+        public bool IsBypassed(Uri host)
+        {
+            return false; // 所有请求都通过代理
+        }
+
+        /// <summary>
+        /// 创建 SOCKS 代理连接
+        /// </summary>
+        public static Socket CreateSocksConnection(string proxyHost, int proxyPort, ProxyType proxyType, 
+            string destinationHost, int destinationPort, string username = null, string password = null)
+        {
+            var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            socket.Connect(proxyHost, proxyPort);
+
+            if (proxyType == ProxyType.Socks5)
+            {
+                // SOCKS5 握手
+                var authRequired = !string.IsNullOrEmpty(username) && !string.IsNullOrEmpty(password);
+                
+                // 发送认证方法
+                var authMethods = new List<byte>();
+                if (authRequired)
+                {
+                    authMethods.Add(0x02); // 用户名/密码认证
+                }
+                authMethods.Add(0x00); // 无认证
+                
+                var authRequest = new byte[2 + authMethods.Count];
+                authRequest[0] = 0x05; // SOCKS 版本
+                authRequest[1] = (byte)authMethods.Count;
+                Array.Copy(authMethods.ToArray(), 0, authRequest, 2, authMethods.Count);
+                socket.Send(authRequest);
+
+                // 接收认证方法响应
+                var authResponse = new byte[2];
+                socket.Receive(authResponse);
+                if (authResponse[0] != 0x05)
+                {
+                    socket.Close();
+                    throw new Exception("SOCKS5 握手失败：版本不匹配");
+                }
+
+                // 如果需要认证
+                if (authResponse[1] == 0x02 && authRequired)
+                {
+                    // 发送用户名/密码
+                    var usernameBytes = Encoding.UTF8.GetBytes(username);
+                    var passwordBytes = Encoding.UTF8.GetBytes(password);
+                    var credRequest = new byte[3 + usernameBytes.Length + passwordBytes.Length];
+                    credRequest[0] = 0x01; // 认证版本
+                    credRequest[1] = (byte)usernameBytes.Length;
+                    Array.Copy(usernameBytes, 0, credRequest, 2, usernameBytes.Length);
+                    credRequest[2 + usernameBytes.Length] = (byte)passwordBytes.Length;
+                    Array.Copy(passwordBytes, 0, credRequest, 3 + usernameBytes.Length, passwordBytes.Length);
+                    socket.Send(credRequest);
+
+                    // 接收认证响应
+                    var credResponse = new byte[2];
+                    socket.Receive(credResponse);
+                    if (credResponse[1] != 0x00)
+                    {
+                        socket.Close();
+                        throw new Exception("SOCKS5 认证失败");
+                    }
+                }
+                else if (authResponse[1] != 0x00)
+                {
+                    socket.Close();
+                    throw new Exception($"SOCKS5 不支持的认证方法: {authResponse[1]}");
+                }
+
+                // 发送连接请求
+                var connectRequest = new List<byte> { 0x05, 0x01, 0x00 }; // VER, CMD, RSV
+                
+                // 解析目标地址
+                if (IPAddress.TryParse(destinationHost, out var ipAddress))
+                {
+                    // IP 地址
+                    connectRequest.Add(0x01); // ATYP = IPv4
+                    connectRequest.AddRange(ipAddress.GetAddressBytes());
+                }
+                else
+                {
+                    // 域名
+                    var hostBytes = Encoding.UTF8.GetBytes(destinationHost);
+                    connectRequest.Add(0x03); // ATYP = 域名
+                    connectRequest.Add((byte)hostBytes.Length);
+                    connectRequest.AddRange(hostBytes);
+                }
+                
+                // 端口（大端序）
+                connectRequest.Add((byte)(destinationPort >> 8));
+                connectRequest.Add((byte)(destinationPort & 0xFF));
+                
+                socket.Send(connectRequest.ToArray());
+
+                // 接收连接响应
+                var connectResponse = new byte[10];
+                var received = socket.Receive(connectResponse);
+                if (received < 4 || connectResponse[0] != 0x05 || connectResponse[1] != 0x00)
+                {
+                    socket.Close();
+                    throw new Exception($"SOCKS5 连接失败: {connectResponse[1]}");
+                }
+            }
+            else if (proxyType == ProxyType.Socks4)
+            {
+                // SOCKS4 连接
+                var connectRequest = new List<byte>();
+                
+                // 命令和端口
+                connectRequest.Add(0x04); // SOCKS 版本
+                connectRequest.Add(0x01); // CONNECT 命令
+                connectRequest.Add((byte)(destinationPort >> 8)); // 端口高字节
+                connectRequest.Add((byte)(destinationPort & 0xFF)); // 端口低字节
+                
+                // IP 地址或域名
+                if (IPAddress.TryParse(destinationHost, out var ipAddress))
+                {
+                    connectRequest.AddRange(ipAddress.GetAddressBytes());
+                }
+                else
+                {
+                    // SOCKS4a 支持域名
+                    connectRequest.Add(0x00);
+                    connectRequest.Add(0x00);
+                    connectRequest.Add(0x00);
+                    connectRequest.Add(0x01); // 非零表示域名
+                    var hostBytes = Encoding.UTF8.GetBytes(destinationHost);
+                    connectRequest.AddRange(hostBytes);
+                }
+                
+                // 用户名（如果提供）
+                if (!string.IsNullOrEmpty(username))
+                {
+                    var usernameBytes = Encoding.UTF8.GetBytes(username);
+                    connectRequest.AddRange(usernameBytes);
+                }
+                connectRequest.Add(0x00); // 结束符
+                
+                // 如果是域名，添加域名
+                if (!IPAddress.TryParse(destinationHost, out _))
+                {
+                    var hostBytes = Encoding.UTF8.GetBytes(destinationHost);
+                    connectRequest.AddRange(hostBytes);
+                    connectRequest.Add(0x00); // 结束符
+                }
+                
+                socket.Send(connectRequest.ToArray());
+
+                // 接收连接响应
+                var connectResponse = new byte[8];
+                var received = socket.Receive(connectResponse);
+                if (received < 2 || connectResponse[0] != 0x00 || connectResponse[1] != 0x5A)
+                {
+                    socket.Close();
+                    throw new Exception($"SOCKS4 连接失败: {connectResponse[1]}");
+                }
+            }
+
+            return socket;
+        }
+    }
+    #endregion
 }
