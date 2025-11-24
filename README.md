@@ -6,7 +6,7 @@
 
 ## 功能特性
 
-- **HTTP请求处理**：简化HTTP客户端操作，支持各种HTTP方法和请求配置
+- **HTTP请求处理**：简化HTTP客户端操作，支持各种HTTP方法和请求配置，支持HTTP/HTTPS和SOCKS4/SOCKS5代理
 - **Cookie管理**：完整的Cookie管理功能，支持添加、获取、删除和批量操作
 - **JSON解析**：灵活的JSON序列化和反序列化，支持动态类型和自定义类型
 - **URL工具**：URL参数处理、排序和转换工具
@@ -157,6 +157,40 @@ var cookieResponse = cookieRequest.GetResponse();
 // 获取响应中的Cookie
 string cookies = cookieResponse.Cookie;
 Console.WriteLine(cookies);
+
+// 7. 使用HTTP代理的请求
+var httpProxyRequest = new HttpRequestClass();
+// 设置HTTP代理（原有方法，保持向后兼容）
+httpProxyRequest.SetProxy("http://proxy.example.com:8080", "username", "password");
+httpProxyRequest.Open("https://api.example.com/data", HttpMethod.Get).Send();
+var httpProxyResponse = httpProxyRequest.GetResponse();
+
+// 8. 使用SOCKS5代理的请求
+var socks5Request = new HttpRequestClass();
+// 设置SOCKS5代理（新方法，支持所有代理类型）
+socks5Request.SetProxy(ProxyType.Socks5, "proxy.example.com", 1080, "username", "password");
+socks5Request.Open("https://api.example.com/data", HttpMethod.Get).Send();
+var socks5Response = socks5Request.GetResponse();
+
+// 9. 使用SOCKS4代理的请求
+var socks4Request = new HttpRequestClass();
+// 设置SOCKS4代理（无需用户名密码）
+socks4Request.SetProxy(ProxyType.Socks4, "proxy.example.com", 1080);
+socks4Request.Open("https://api.example.com/data", HttpMethod.Get).Send();
+var socks4Response = socks4Request.GetResponse();
+
+// 10. 使用HTTP代理（通过新方法）
+var httpProxyRequest2 = new HttpRequestClass();
+// 新方法也支持HTTP代理
+httpProxyRequest2.SetProxy(ProxyType.Http, "proxy.example.com", 8080, "username", "password");
+httpProxyRequest2.Open("https://api.example.com/data", HttpMethod.Get).Send();
+var httpProxyResponse2 = httpProxyRequest2.GetResponse();
+
+// 11. 取消代理设置
+var request = new HttpRequestClass();
+request.SetProxy("http://proxy.example.com:8080"); // 设置代理
+request.RemoveProxy(); // 取消代理，后续请求将直连
+request.Open("https://api.example.com/data", HttpMethod.Get).Send();
 ```
 
 ### Cookie管理示例
