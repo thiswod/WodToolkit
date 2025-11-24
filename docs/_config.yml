@@ -3,18 +3,15 @@ description: 轻量级.NET工具库，提供各类常用功能的封装
 baseurl: "/WodToolkit"
 url: "https://thiswod.github.io"
 
-# 插件设置（GitHub Pages 支持的插件）
-plugins:
-  - jekyll-feed
-  - jekyll-sitemap
-  - jekyll-seo-tag
-
 # 使用自定义布局
 defaults:
   - scope:
       path: ""
     values:
       layout: default
+
+# 安全设置
+safe: true
 
 # 导航
 navigation:
