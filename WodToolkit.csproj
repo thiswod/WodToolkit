@@ -6,7 +6,7 @@
     <PackAsTool>False</PackAsTool>
     <!-- NuGet包元数据 -->
     <PackageId>WodToolKit</PackageId>
-    <Version>1.0.0.2</Version>
+    <Version>1.0.0.3</Version>
     <Title>WodToolKit - 轻量级.NET工具库</Title>
     <Authors>Wod</Authors>
     <Company>Wod</Company>
@@ -50,6 +50,7 @@
     <PackageReference Include="System.Text.Json" Version="9.0.10" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="System.Security.Cryptography.Algorithms" Version="4.3.0" />
+    <PackageReference Include="Jint" Version="4.4.2" />
   </ItemGroup>
 
   <!-- 将README.md和图标包含在NuGet包中 -->
