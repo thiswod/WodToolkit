@@ -10,42 +10,9 @@ defaults:
     values:
       layout: default
 
-# 安全设置
-safe: true
-
-# 导航
-navigation:
-  - title: 首页
-    url: /
-  - title: 快速开始
-    url: /getting-started
-  - title: HTTP请求
-    url: /http
-  - title: Cookie管理
-    url: /cookie
-  - title: JSON处理
-    url: /json
-  - title: JavaScript执行
-    url: /javascript
-  - title: 缓存
-    url: /cache
-  - title: 线程池
-    url: /threadpool
-  - title: AES加密
-    url: /aes
-  - title: API参考
-    url: /api
-
-# 作者信息
-author: Wod
-github_username: thiswod
-
-# 排除文件（只排除 docs 目录内的文件）
+# 排除文件
 exclude:
   - Gemfile
   - Gemfile.lock
-  - node_modules
-  - vendor/
   - README_EN.md
   - test.md
-
