@@ -6,7 +6,7 @@ A lightweight .NET toolkit that provides encapsulation of various common functio
 
 ## Features
 
-- **HTTP Request Handling**: Simplified HTTP client operations, supporting various HTTP methods and request configurations
+- **HTTP Request Handling**: Simplified HTTP client operations, supporting various HTTP methods and request configurations, with support for HTTP/HTTPS and SOCKS4/SOCKS5 proxies
 - **Cookie Management**: Complete cookie management functionality, supporting addition, retrieval, deletion, and batch operations
 - **JSON Parsing**: Flexible JSON serialization and deserialization, supporting dynamic types and custom types
 - **URL Tools**: URL parameter processing, sorting, and conversion utilities
@@ -157,6 +157,40 @@ var cookieResponse = cookieRequest.GetResponse();
 // Get Cookie from response
 string cookies = cookieResponse.Cookie;
 Console.WriteLine(cookies);
+
+// 7. Request with HTTP proxy
+var httpProxyRequest = new HttpRequestClass();
+// Set HTTP proxy (original method, maintains backward compatibility)
+httpProxyRequest.SetProxy("http://proxy.example.com:8080", "username", "password");
+httpProxyRequest.Open("https://api.example.com/data", HttpMethod.Get).Send();
+var httpProxyResponse = httpProxyRequest.GetResponse();
+
+// 8. Request with SOCKS5 proxy
+var socks5Request = new HttpRequestClass();
+// Set SOCKS5 proxy (new method, supports all proxy types)
+socks5Request.SetProxy(ProxyType.Socks5, "proxy.example.com", 1080, "username", "password");
+socks5Request.Open("https://api.example.com/data", HttpMethod.Get).Send();
+var socks5Response = socks5Request.GetResponse();
+
+// 9. Request with SOCKS4 proxy
+var socks4Request = new HttpRequestClass();
+// Set SOCKS4 proxy (no username/password required)
+socks4Request.SetProxy(ProxyType.Socks4, "proxy.example.com", 1080);
+socks4Request.Open("https://api.example.com/data", HttpMethod.Get).Send();
+var socks4Response = socks4Request.GetResponse();
+
+// 10. Request with HTTP proxy (using new method)
+var httpProxyRequest2 = new HttpRequestClass();
+// New method also supports HTTP proxy
+httpProxyRequest2.SetProxy(ProxyType.Http, "proxy.example.com", 8080, "username", "password");
+httpProxyRequest2.Open("https://api.example.com/data", HttpMethod.Get).Send();
+var httpProxyResponse2 = httpProxyRequest2.GetResponse();
+
+// 11. Remove proxy settings
+var request = new HttpRequestClass();
+request.SetProxy("http://proxy.example.com:8080"); // Set proxy
+request.RemoveProxy(); // Remove proxy, subsequent requests will connect directly
+request.Open("https://api.example.com/data", HttpMethod.Get).Send();
 ```
 
 ### Cookie Management Example
