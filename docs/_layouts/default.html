@@ -94,9 +94,7 @@
           menuToggle.setAttribute('aria-expanded', !isExpanded);
           navMenu.classList.toggle('active');
           menuToggle.classList.toggle('active');
-          if (sidebar) {
-            sidebar.classList.toggle('active');
-          }
+          // 顶部导航菜单不应该控制侧边栏
         });
 
         // 点击菜单项后关闭移动端菜单
@@ -135,6 +133,11 @@
 
       // 侧边栏切换按钮（移动端）
       if (sidebar) {
+        // 确保侧边栏在移动端默认隐藏
+        if (window.innerWidth <= 768) {
+          sidebar.classList.remove('active');
+        }
+        
         const sidebarOverlay = document.getElementById('sidebarOverlay');
         const sidebarToggle = document.createElement('button');
         sidebarToggle.className = 'sidebar-toggle';
