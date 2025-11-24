@@ -160,6 +160,41 @@ header {
   transform: scale(0.98);
 }
 
+/* 侧边栏菜单切换按钮（顶部导航栏） */
+.sidebar-menu-toggle {
+  display: none;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(96, 165, 250, 0.1);
+  border: 1px solid rgba(96, 165, 250, 0.3);
+  color: var(--primary-color);
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  margin-right: 0.5rem;
+}
+
+.sidebar-menu-toggle:hover {
+  background: rgba(96, 165, 250, 0.2);
+  border-color: var(--primary-color);
+}
+
+.sidebar-menu-toggle.active {
+  background: rgba(96, 165, 250, 0.2);
+  border-color: var(--primary-color);
+}
+
+.sidebar-menu-toggle svg {
+  flex-shrink: 0;
+}
+
+.sidebar-menu-text {
+  display: none;
+}
+
 /* Main Content */
 main {
   padding: 2rem 0;
@@ -359,6 +394,24 @@ footer a {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
+    flex-wrap: nowrap;
+  }
+
+  .logo {
+    flex-shrink: 0;
+  }
+
+  .sidebar-menu-toggle {
+    flex-shrink: 0;
+    order: -1;
+  }
+
+  .sidebar-menu-toggle {
+    display: flex;
+  }
+
+  .sidebar-menu-text {
+    display: inline;
   }
 
   .menu-toggle {
@@ -470,19 +523,7 @@ footer a {
     margin-left: 0 !important;
   }
 
-  .sidebar-toggle {
-    display: flex;
-    position: fixed;
-    top: 85px;
-    left: 15px;
-    z-index: 101;
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    padding: 0.5rem;
-    cursor: pointer;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-  }
+  /* 移除旧的侧边栏切换按钮，改用顶部导航栏的按钮 */
 
   /* Hero Responsive */
   .hero {

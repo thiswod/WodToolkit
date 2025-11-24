@@ -24,6 +24,14 @@
           <span class="logo-icon">W</span>
           <span class="logo-text">{{ site.title }}</span>
         </a>
+        <button class="sidebar-menu-toggle" id="sidebarMenuToggle" aria-label="打开文档目录" aria-expanded="false">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+          <span class="sidebar-menu-text">目录</span>
+        </button>
         <button class="menu-toggle" aria-label="切换菜单" aria-expanded="false">
           <span></span>
           <span></span>
@@ -139,34 +147,43 @@
         }
         
         const sidebarOverlay = document.getElementById('sidebarOverlay');
-        const sidebarToggle = document.createElement('button');
-        sidebarToggle.className = 'sidebar-toggle';
-        sidebarToggle.innerHTML = '<span></span><span></span><span></span>';
-        sidebarToggle.setAttribute('aria-label', '切换侧边栏');
+        const sidebarMenuToggle = document.getElementById('sidebarMenuToggle');
         
         function toggleSidebar() {
+          const isActive = sidebar.classList.contains('active');
           sidebar.classList.toggle('active');
           if (sidebarOverlay) {
             sidebarOverlay.classList.toggle('active');
           }
+          if (sidebarMenuToggle) {
+            sidebarMenuToggle.setAttribute('aria-expanded', !isActive);
+            sidebarMenuToggle.classList.toggle('active');
+          }
           // 防止背景滚动
-          if (sidebar.classList.contains('active')) {
+          if (!isActive) {
             document.body.style.overflow = 'hidden';
           } else {
             document.body.style.overflow = '';
           }
         }
         
-        sidebarToggle.addEventListener('click', function(e) {
-          e.stopPropagation();
-          toggleSidebar();
-        });
+        // 顶部导航栏的目录按钮
+        if (sidebarMenuToggle) {
+          sidebarMenuToggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            toggleSidebar();
+          });
+        }
         
         // 点击遮罩层关闭侧边栏
         if (sidebarOverlay) {
           sidebarOverlay.addEventListener('click', function() {
             sidebar.classList.remove('active');
             sidebarOverlay.classList.remove('active');
+            if (sidebarMenuToggle) {
+              sidebarMenuToggle.setAttribute('aria-expanded', 'false');
+              sidebarMenuToggle.classList.remove('active');
+            }
             document.body.style.overflow = '';
           });
         }
@@ -180,15 +197,14 @@
               if (sidebarOverlay) {
                 sidebarOverlay.classList.remove('active');
               }
+              if (sidebarMenuToggle) {
+                sidebarMenuToggle.setAttribute('aria-expanded', 'false');
+                sidebarMenuToggle.classList.remove('active');
+              }
               document.body.style.overflow = '';
             }
           });
         });
-        
-        const docContent = document.querySelector('.doc-content');
-        if (docContent) {
-          docContent.insertBefore(sidebarToggle, docContent.firstChild);
-        }
       }
     })();
   </script>
