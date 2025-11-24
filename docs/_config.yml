@@ -1,0 +1,57 @@
+title: WodToolKit
+description: 轻量级.NET工具库，提供各类常用功能的封装
+baseurl: "/WodToolkit"
+url: "https://thiswod.github.io"
+
+# 主题设置
+theme: minima
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+  - jekyll-seo-tag
+
+# 导航
+navigation:
+  - title: 首页
+    url: /
+  - title: 快速开始
+    url: /getting-started
+  - title: HTTP请求
+    url: /http
+  - title: Cookie管理
+    url: /cookie
+  - title: JSON处理
+    url: /json
+  - title: JavaScript执行
+    url: /javascript
+  - title: 缓存
+    url: /cache
+  - title: 线程池
+    url: /threadpool
+  - title: AES加密
+    url: /aes
+  - title: API参考
+    url: /api
+
+# 作者信息
+author: Wod
+github_username: thiswod
+
+# 排除文件
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor/bundle/
+  - vendor/cache/
+  - vendor/gems/
+  - vendor/ruby/
+  - README_EN.md
+  - ../bin/
+  - ../obj/
+  - ../.vs/
+  - ../.vscode/
+  - ../src/
+  - ../WodToolkit.csproj
+  - ../WodToolkit.sln
+
