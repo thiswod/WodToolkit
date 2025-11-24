@@ -15,4 +15,3 @@ exclude:
   - Gemfile
   - Gemfile.lock
   - README_EN.md
-  - test.md
