@@ -2,7 +2,8 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  <meta name="format-detection" content="telephone=no">
   <title>{% if page.title %}{{ page.title }} - {% endif %}{{ site.title }}</title>
   <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
@@ -19,8 +20,15 @@
   <header>
     <nav class="navbar">
       <div class="container">
-        <a href="{{ '/' | relative_url }}" class="logo">{{ site.title }}</a>
-        <ul class="nav-menu">
+        <div class="nav-header">
+          <a href="{{ '/' | relative_url }}" class="logo">{{ site.title }}</a>
+          <button class="menu-toggle" aria-label="切换菜单" aria-expanded="false">
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+        </div>
+        <ul class="nav-menu" id="navMenu">
           <li><a href="{{ '/' | relative_url }}">首页</a></li>
           <li><a href="{{ '/getting-started' | relative_url }}">快速开始</a></li>
           <li><a href="{{ '/http' | relative_url }}">HTTP请求</a></li>
@@ -45,6 +53,47 @@
       </p>
     </div>
   </footer>
+
+  <script>
+    // 移动端菜单切换
+    (function() {
+      const menuToggle = document.querySelector('.menu-toggle');
+      const navMenu = document.getElementById('navMenu');
+      
+      if (menuToggle && navMenu) {
+        menuToggle.addEventListener('click', function() {
+          const isExpanded = menuToggle.getAttribute('aria-expanded') === 'true';
+          menuToggle.setAttribute('aria-expanded', !isExpanded);
+          navMenu.classList.toggle('active');
+          menuToggle.classList.toggle('active');
+        });
+
+        // 点击菜单项后关闭移动端菜单
+        const navLinks = navMenu.querySelectorAll('a');
+        navLinks.forEach(function(link) {
+          link.addEventListener('click', function() {
+            if (window.innerWidth <= 768) {
+              navMenu.classList.remove('active');
+              menuToggle.classList.remove('active');
+              menuToggle.setAttribute('aria-expanded', 'false');
+            }
+          });
+        });
+
+        // 点击外部区域关闭菜单
+        document.addEventListener('click', function(event) {
+          if (window.innerWidth <= 768) {
+            const isClickInsideNav = navMenu.contains(event.target) || menuToggle.contains(event.target);
+            if (!isClickInsideNav && navMenu.classList.contains('active')) {
+              navMenu.classList.remove('active');
+              menuToggle.classList.remove('active');
+              menuToggle.setAttribute('aria-expanded', 'false');
+            }
+          }
+        });
+      }
+    })();
+  </script>
 </body>
 </html>
 
