@@ -207,3 +207,7 @@ else
 2. 查看 [[API 参考|API-Reference]]
 3. 提交 [GitHub Issue](https://github.com/thiswod/WodToolKit/issues)
 
+---
+
+**Language**: 中文 (Chinese) | [English](Quick-Start-EN)
+

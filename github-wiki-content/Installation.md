@@ -107,3 +107,7 @@ dotnet remove package WodToolKit
 
 安装完成后，请查看 [[快速开始|Quick-Start]] 指南开始使用 WodToolKit。
 
+---
+
+**Language**: 中文 (Chinese) | [English](Installation-EN)
+

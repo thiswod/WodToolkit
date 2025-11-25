@@ -57,5 +57,7 @@ WodToolKit 是一个轻量级 .NET 工具库，提供各类常用功能的封装
 
 ---
 
+**Language**: 中文 (Chinese) | [English](Home-EN)
+
 **开始使用**: [[安装指南|Installation]] → [[快速开始|Quick-Start]]
 
