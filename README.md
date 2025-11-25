@@ -13,7 +13,7 @@
 - **AES加密**：安全的AES加密和解密功能，支持多种加密模式和填充方式
 - **内存缓存**：基于内存的临时缓存实现，支持TTL设置和自动清理
 - **线程池管理**：简单高效的线程池实现，支持任务队列和任务等待
-- **JavaScript执行**：支持两种执行方式，JintRunner（纯.NET实现，无需Node.js）和NodeJsRunner（需要Node.js），支持代码字符串和文件执行，以及调用特定方法并传递参数
+- **JavaScript执行**：支持两种执行方式，JintRunner（纯.NET实现，无需Node.js）和NodeJsRunner（需要Node.js），支持代码字符串和文件执行、方法调用、变量管理、函数调用等丰富功能
 - **.NET Standard 2.1兼容**：支持.NET Core、.NET Framework和其他兼容平台
 - **模块化设计**：各功能模块相互独立，便于扩展和维护
 - **持续更新**：计划逐步添加更多常用功能模块
@@ -337,7 +337,37 @@ using (var jintRunner = new JintRunner())
     var syncResult = jintRunner.ExecuteScript("console.log('同步执行'); 1 + 1;");
     Console.WriteLine($"同步执行结果: {syncResult.Output}");
     
-    // 8. 错误处理
+    // 8. 直接执行并获取结果值（Evaluate）
+    var evalResult = jintRunner.Evaluate("2 + 3 * 4");
+    Console.WriteLine($"计算结果: {evalResult.AsNumber()}"); // 输出: 14
+    
+    // 9. 设置和获取变量
+    jintRunner.SetValue("userName", "John");
+    jintRunner.SetValue("userAge", 25);
+    var name = jintRunner.GetValue("userName");
+    var age = jintRunner.GetValue("userAge");
+    Console.WriteLine($"用户名: {name.AsString()}, 年龄: {age.AsNumber()}");
+    
+    // 10. 直接调用函数（Invoke）
+    jintRunner.Evaluate(@"
+        function multiply(a, b) {
+            return a * b;
+        }
+    ");
+    var multiplyResult = jintRunner.Invoke("multiply", 5, 6);
+    Console.WriteLine($"5 * 6 = {multiplyResult.AsNumber()}"); // 输出: 30
+    
+    // 11. 获取所有函数和变量
+    var functions = jintRunner.GetFunctions();
+    var variables = jintRunner.GetVariables();
+    Console.WriteLine($"函数数量: {functions.Count}, 变量数量: {variables.Count}");
+    
+    // 12. 控制台输出管理
+    jintRunner.Evaluate("console.log('普通输出'); console.warn('警告'); console.error('错误');");
+    Console.WriteLine($"控制台输出: {jintRunner.ConsoleOutput}");
+    Console.WriteLine($"错误输出: {jintRunner.ConsoleError}");
+    
+    // 13. 错误处理
     var errorResult = await jintRunner.ExecuteScriptAsync("throw new Error('测试错误');");
     if (!errorResult.Success)
     {
@@ -441,9 +471,10 @@ module.exports = {
 
 #### 使用建议
 
-- **推荐使用 JintRunner**：无需安装 Node.js，性能更好，集成更方便
+- **推荐使用 JintRunner**：无需安装 Node.js，性能更好，集成更方便，功能更丰富（支持 Evaluate、Invoke、SetValue、GetValue 等高级功能）
 - **使用 NodeJsRunner**：当需要完整的 Node.js 生态系统支持时（如 npm 包、Node.js API 等）
-- **两种执行器 API 完全兼容**：可以轻松切换，无需修改调用代码
+- **两种执行器核心 API 完全兼容**：可以轻松切换，无需修改调用代码
+- **JintRunner 额外功能**：提供变量管理、直接函数调用、控制台输出管理等高级功能，这些功能在 NodeJsRunner 中不可用
 
 ## 项目架构与组织
 
