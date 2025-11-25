@@ -9,9 +9,11 @@ WodToolKit 提供了两种 JavaScript 执行方式：**JintRunner**（推荐）�
 
 ## JintRunner（推荐）
 
-JintRunner 是纯 .NET 实现，无需安装 Node.js，性能更好，集成更方便。
+JintRunner 是纯 .NET 实现，无需安装 Node.js，性能更好，集成更方便。支持完整的 JavaScript 执行、变量管理、函数调用等功能。
 
 ### 基本用法
+
+#### 异步执行
 
 ```csharp
 using WodToolkit.Script;
@@ -27,6 +29,31 @@ using (var jintRunner = new JintRunner())
     Console.WriteLine($"输出: {result.Output}");
     Console.WriteLine($"成功: {result.Success}");
 }
+```
+
+#### 同步执行
+
+```csharp
+using (var jintRunner = new JintRunner())
+{
+    // 同步执行 JavaScript 代码
+    var result = jintRunner.ExecuteScript(@"
+        console.log('同步执行');
+        return 42;
+    ");
+    
+    Console.WriteLine($"输出: {result.Output}");
+}
+```
+
+#### 执行文件
+
+```csharp
+// 异步执行文件
+var result = await jintRunner.ExecuteScriptFileAsync("./script.js");
+
+// 同步执行文件
+var result = jintRunner.ExecuteScriptFile("./script.js");
 ```
 
 ### 调用方法
@@ -102,6 +129,135 @@ using (var jintRunner = new JintRunner())
 }
 ```
 
+### 高级功能
+
+#### 直接执行并获取结果值
+
+```csharp
+using (var jintRunner = new JintRunner())
+{
+    // Evaluate 方法直接返回 JsValue，适合获取表达式结果
+    var result = jintRunner.Evaluate("2 + 3 * 4");
+    Console.WriteLine($"结果: {result.AsNumber()}"); // 输出: 14
+    
+    // 执行代码并获取变量值
+    jintRunner.Evaluate("var x = 10; var y = 20;");
+    var x = jintRunner.GetValue("x");
+    var y = jintRunner.GetValue("y");
+    Console.WriteLine($"x = {x.AsNumber()}, y = {y.AsNumber()}");
+}
+```
+
+#### 设置和获取变量
+
+```csharp
+using (var jintRunner = new JintRunner())
+{
+    // 设置变量
+    jintRunner.SetValue("userName", "John");
+    jintRunner.SetValue("userAge", 25);
+    jintRunner.SetValue("isActive", true);
+    
+    // 获取变量
+    var name = jintRunner.GetValue("userName");
+    var age = jintRunner.GetValue("userAge");
+    Console.WriteLine($"用户名: {name.AsString()}, 年龄: {age.AsNumber()}");
+    
+    // 在 JavaScript 中使用这些变量
+    var result = jintRunner.Evaluate("userName + ' is ' + userAge + ' years old'");
+    Console.WriteLine(result.AsString()); // 输出: John is 25 years old
+}
+```
+
+#### 直接调用函数
+
+```csharp
+using (var jintRunner = new JintRunner())
+{
+    // 定义函数
+    jintRunner.Evaluate(@"
+        function multiply(a, b) {
+            return a * b;
+        }
+    ");
+    
+    // 直接调用函数
+    var result = jintRunner.Invoke("multiply", 5, 6);
+    Console.WriteLine($"5 * 6 = {result.AsNumber()}"); // 输出: 30
+}
+```
+
+#### 获取所有函数和变量
+
+```csharp
+using (var jintRunner = new JintRunner())
+{
+    // 执行一些代码
+    jintRunner.Evaluate(@"
+        function add(a, b) { return a + b; }
+        function subtract(a, b) { return a - b; }
+        var x = 10;
+        var y = 20;
+    ");
+    
+    // 获取所有函数名
+    var functions = jintRunner.GetFunctions();
+    Console.WriteLine("函数列表:");
+    foreach (var func in functions)
+    {
+        Console.WriteLine($"  - {func}");
+    }
+    
+    // 获取所有变量
+    var variables = jintRunner.GetVariables();
+    Console.WriteLine("变量列表:");
+    foreach (var variable in variables)
+    {
+        Console.WriteLine($"  - {variable}");
+    }
+}
+```
+
+#### 控制台输出管理
+
+```csharp
+using (var jintRunner = new JintRunner())
+{
+    jintRunner.Evaluate(@"
+        console.log('这是普通输出');
+        console.warn('这是警告');
+        console.info('这是信息');
+        console.error('这是错误');
+    ");
+    
+    // 获取控制台输出
+    Console.WriteLine("控制台输出:");
+    Console.WriteLine(jintRunner.ConsoleOutput);
+    
+    // 获取错误输出
+    Console.WriteLine("错误输出:");
+    Console.WriteLine(jintRunner.ConsoleError);
+    
+    // 清除控制台
+    jintRunner.ClearConsole();
+}
+```
+
+#### 访问底层引擎
+
+```csharp
+using (var jintRunner = new JintRunner())
+{
+    // 获取底层 Jint 引擎，进行高级操作
+    var engine = jintRunner.Engine;
+    
+    // 可以直接使用引擎的所有功能
+    engine.SetValue("customVar", "自定义值");
+    var value = engine.GetValue("customVar");
+    Console.WriteLine(value.AsString());
+}
+```
+
 ## NodeJsRunner
 
 NodeJsRunner 需要系统安装 Node.js，支持完整的 Node.js 生态系统。
@@ -173,10 +329,50 @@ module.exports = {
 };
 ```
 
+## JintRunner API 参考
+
+### 主要方法
+
+| 方法 | 说明 | 异步/同步 |
+|------|------|----------|
+| `ExecuteScriptAsync(string)` | 异步执行 JavaScript 代码 | 异步 |
+| `ExecuteScript(string)` | 同步执行 JavaScript 代码 | 同步 |
+| `ExecuteScriptFileAsync(string)` | 异步执行 JavaScript 文件 | 异步 |
+| `ExecuteScriptFile(string)` | 同步执行 JavaScript 文件 | 同步 |
+| `CallMethodAsync(string, string, params object[])` | 异步调用文件中的方法 | 异步 |
+| `CallMethod(string, string, params object[])` | 同步调用文件中的方法 | 同步 |
+| `CallMethodFromScriptAsync(string, string, params object[])` | 异步调用代码中的方法 | 异步 |
+| `CallMethodFromScript(string, string, params object[])` | 同步调用代码中的方法 | 同步 |
+| `Evaluate(string)` | 执行代码并返回结果值 | 同步 |
+| `Invoke(string, params object[])` | 直接调用函数 | 同步 |
+| `SetValue(string, object)` | 设置变量值 | 同步 |
+| `GetValue(string)` | 获取变量值 | 同步 |
+| `GetFunctions()` | 获取所有函数名列表 | 同步 |
+| `GetVariables()` | 获取所有变量信息列表 | 同步 |
+| `GetResult<T>(JavaScriptExecutionResult)` | 从执行结果中提取返回值 | 同步 |
+| `ClearConsole()` | 清除控制台输出 | 同步 |
+
+### 主要属性
+
+| 属性 | 说明 |
+|------|------|
+| `Engine` | 获取底层 Jint 引擎实例（用于高级操作） |
+| `ConsoleOutput` | 获取控制台输出内容 |
+| `ConsoleError` | 获取控制台错误输出内容 |
+
+### Console 对象支持
+
+JintRunner 支持以下 console 方法：
+
+- `console.log(...args)` - 普通输出
+- `console.error(...args)` - 错误输出
+- `console.warn(...args)` - 警告输出
+- `console.info(...args)` - 信息输出
+
 ## 使用建议
 
 <div class="alert alert-info">
-<strong>推荐使用 JintRunner</strong>：无需安装 Node.js，性能更好，集成更方便。
+<strong>推荐使用 JintRunner</strong>：无需安装 Node.js，性能更好，集成更方便，功能更丰富。
 </div>
 
 <div class="alert alert-warning">
@@ -185,7 +381,7 @@ module.exports = {
 
 ## API 兼容性
 
-两种执行器具有完全相同的 API，可以轻松切换：
+两种执行器具有完全相同的核心 API，可以轻松切换：
 
 ```csharp
 // 可以轻松切换
@@ -193,4 +389,6 @@ IJavaScriptRunner runner = new JintRunner(); // 或 new NodeJsRunner()
 
 var result = await runner.ExecuteScriptAsync("console.log('Hello');");
 ```
+
+但 JintRunner 提供了更多高级功能（如 Evaluate、Invoke、SetValue 等），这些功能在 NodeJsRunner 中不可用。
 
