@@ -28,6 +28,11 @@ namespace WodToolkit.Script
         private bool _disposed;
         private readonly StringBuilder _consoleOutput;
         private readonly StringBuilder _consoleError;
+        
+        /// <summary>
+        /// 获取底层Jint引擎实例（用于高级操作，如设置变量、获取变量等）
+        /// </summary>
+        public Engine Engine => _engine;
 
         /// <summary>
         /// 构造函数
@@ -592,6 +597,207 @@ namespace WodToolkit.Script
                 // 如果解析失败，抛出异常
                 throw new InvalidOperationException("无法从输出中提取有效结果");
             }
+        }
+
+        /// <summary>
+        /// 执行JavaScript代码并返回结果值
+        /// </summary>
+        /// <param name="javascriptCode">要执行的JavaScript代码字符串</param>
+        /// <returns>执行结果值</returns>
+        public JsValue Evaluate(string javascriptCode)
+        {
+            if (string.IsNullOrEmpty(javascriptCode))
+                throw new ArgumentNullException(nameof(javascriptCode));
+            if (_disposed)
+                throw new ObjectDisposedException(nameof(JintRunner));
+
+            _consoleOutput.Clear();
+            _consoleError.Clear();
+            return _engine.Evaluate(javascriptCode);
+        }
+
+        /// <summary>
+        /// 调用JavaScript函数
+        /// </summary>
+        /// <param name="functionName">函数名</param>
+        /// <param name="parameters">函数参数</param>
+        /// <returns>函数返回值</returns>
+        public JsValue Invoke(string functionName, params object[] parameters)
+        {
+            if (string.IsNullOrEmpty(functionName))
+                throw new ArgumentNullException(nameof(functionName));
+            if (_disposed)
+                throw new ObjectDisposedException(nameof(JintRunner));
+
+            _consoleOutput.Clear();
+            _consoleError.Clear();
+
+            // 获取函数
+            var method = _engine.GetValue(functionName);
+            if (method.IsUndefined())
+            {
+                throw new InvalidOperationException($"函数 '{functionName}' 未找到");
+            }
+
+            // 准备参数
+            var jsParameters = new List<JsValue>();
+            if (parameters != null && parameters.Length > 0)
+            {
+                foreach (var param in parameters)
+                {
+                    jsParameters.Add(ConvertToJsValue(param));
+                }
+            }
+
+            // 调用函数
+            if (method.IsObject())
+            {
+                return method.AsObject().Call(JsValue.Undefined, jsParameters.ToArray());
+            }
+
+            throw new InvalidOperationException($"'{functionName}' 不是一个可调用的函数");
+        }
+
+        /// <summary>
+        /// 设置变量值
+        /// </summary>
+        /// <param name="variableName">变量名</param>
+        /// <param name="value">变量值</param>
+        public void SetValue(string variableName, object value)
+        {
+            if (string.IsNullOrEmpty(variableName))
+                throw new ArgumentNullException(nameof(variableName));
+            if (_disposed)
+                throw new ObjectDisposedException(nameof(JintRunner));
+
+            var jsValue = ConvertToJsValue(value);
+            _engine.SetValue(variableName, jsValue);
+        }
+
+        /// <summary>
+        /// 获取变量值
+        /// </summary>
+        /// <param name="variableName">变量名</param>
+        /// <returns>变量值</returns>
+        public JsValue GetValue(string variableName)
+        {
+            if (string.IsNullOrEmpty(variableName))
+                throw new ArgumentNullException(nameof(variableName));
+            if (_disposed)
+                throw new ObjectDisposedException(nameof(JintRunner));
+
+            return _engine.GetValue(variableName);
+        }
+
+        /// <summary>
+        /// 获取所有函数名列表
+        /// </summary>
+        /// <returns>函数名列表</returns>
+        public List<string> GetFunctions()
+        {
+            if (_disposed)
+                throw new ObjectDisposedException(nameof(JintRunner));
+
+            var functions = new List<string>();
+            try
+            {
+                var result = _engine.Evaluate(@"
+                    (function() {
+                        var funcs = [];
+                        for (var prop in this) {
+                            if (typeof this[prop] === 'function' && prop !== 'console') {
+                                funcs.push(prop);
+                            }
+                        }
+                        return funcs;
+                    })();
+                ");
+
+                if (result != null && result.IsArray())
+                {
+                    var array = result.AsArray();
+                    var lengthValue = array.Get("length");
+                    int length = lengthValue.IsNumber() ? (int)lengthValue.AsNumber() : 0;
+
+                    for (int i = 0; i < length; i++)
+                    {
+                        var funcName = array.Get(i.ToString()).ToString();
+                        functions.Add(funcName);
+                    }
+                }
+            }
+            catch
+            {
+                // 如果获取失败，返回空列表
+            }
+
+            return functions;
+        }
+
+        /// <summary>
+        /// 获取所有变量名和值的列表
+        /// </summary>
+        /// <returns>变量信息列表（格式：变量名 = 值）</returns>
+        public List<string> GetVariables()
+        {
+            if (_disposed)
+                throw new ObjectDisposedException(nameof(JintRunner));
+
+            var variables = new List<string>();
+            try
+            {
+                var result = _engine.Evaluate(@"
+                    (function() {
+                        var vars = [];
+                        for (var prop in this) {
+                            if (typeof this[prop] !== 'function' && prop !== 'console') {
+                                var value = this[prop];
+                                var valueStr = typeof value === 'object' ? JSON.stringify(value) : String(value);
+                                vars.push(prop + ' = ' + valueStr);
+                            }
+                        }
+                        return vars;
+                    })();
+                ");
+
+                if (result != null && result.IsArray())
+                {
+                    var array = result.AsArray();
+                    var lengthValue = array.Get("length");
+                    int length = lengthValue.IsNumber() ? (int)lengthValue.AsNumber() : 0;
+
+                    for (int i = 0; i < length; i++)
+                    {
+                        var varInfo = array.Get(i.ToString()).ToString();
+                        variables.Add(varInfo);
+                    }
+                }
+            }
+            catch
+            {
+                // 如果获取失败，返回空列表
+            }
+
+            return variables;
+        }
+
+        /// <summary>
+        /// 获取控制台输出
+        /// </summary>
+        public string ConsoleOutput => _consoleOutput.ToString();
+
+        /// <summary>
+        /// 获取控制台错误输出
+        /// </summary>
+        public string ConsoleError => _consoleError.ToString();
+
+        /// <summary>
+        /// 清除控制台输出
+        /// </summary>
+        public void ClearConsole()
+        {
+            _consoleOutput.Clear();
+            _consoleError.Clear();
         }
 
         /// <summary>
