@@ -21,18 +21,6 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageIcon>icon.png</PackageIcon>
       <PackageReadmeFile>docs/README_EN.md</PackageReadmeFile>
-    <ReleaseNotes>
-      ## 1.0.0.0
-      - 初始版本发布
-      - 实现HTTP请求处理功能
-      - 实现完整的Cookie管理功能
-      - 实现灵活的JSON解析功能
-      - 实现URL参数处理工具
-      - 实现安全的AES加密和解密功能
-      - 实现JavaScript执行功能，支持调用JS代码和文件中的特定方法并传递参数
-      - 实现基于内存的临时缓存实现
-      - 实现简单高效的线程池管理功能
-    </ReleaseNotes>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <!-- NuGet包自述文件配置 -->
     <PackageReadmeFile>README.md</PackageReadmeFile>
