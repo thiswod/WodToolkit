@@ -55,60 +55,42 @@ namespace WodToolkit.Script
                 options.CatchClrExceptions();
             });
 
-            // 实现 console.log - 使用 JavaScript 代码定义，更可靠地处理可变参数
-            _engine.SetValue("_consoleLog", new Action<JsValue[]>(args =>
+            // 实现 console.log
+            _engine.SetValue("console", new
             {
-                if (args != null && args.Length > 0)
+                log = new Action<object[]>(args =>
                 {
-                    var output = string.Join(" ", Array.ConvertAll(args, a => a?.ToString() ?? "null"));
-                    _consoleOutput.AppendLine(output);
-                }
-            }));
-            
-            _engine.SetValue("_consoleError", new Action<JsValue[]>(args =>
-            {
-                if (args != null && args.Length > 0)
-                {
-                    var error = string.Join(" ", Array.ConvertAll(args, a => a?.ToString() ?? "null"));
-                    _consoleError.AppendLine(error);
-                }
-            }));
-            
-            _engine.SetValue("_consoleWarn", new Action<JsValue[]>(args =>
-            {
-                if (args != null && args.Length > 0)
-                {
-                    var output = string.Join(" ", Array.ConvertAll(args, a => a?.ToString() ?? "null"));
-                    _consoleOutput.AppendLine($"[WARN] {output}");
-                }
-            }));
-            
-            _engine.SetValue("_consoleInfo", new Action<JsValue[]>(args =>
-            {
-                if (args != null && args.Length > 0)
-                {
-                    var output = string.Join(" ", Array.ConvertAll(args, a => a?.ToString() ?? "null"));
-                    _consoleOutput.AppendLine($"[INFO] {output}");
-                }
-            }));
-            
-            // 使用 JavaScript 代码定义 console 对象，正确处理可变参数
-            _engine.Execute(@"
-                var console = {
-                    log: function() {
-                        _consoleLog(Array.prototype.slice.call(arguments));
-                    },
-                    error: function() {
-                        _consoleError(Array.prototype.slice.call(arguments));
-                    },
-                    warn: function() {
-                        _consoleWarn(Array.prototype.slice.call(arguments));
-                    },
-                    info: function() {
-                        _consoleInfo(Array.prototype.slice.call(arguments));
+                    if (args != null && args.Length > 0)
+                    {
+                        var output = string.Join(" ", Array.ConvertAll(args, a => a?.ToString() ?? "null"));
+                        _consoleOutput.AppendLine(output);
                     }
-                };
-            ");
+                }),
+                error = new Action<object[]>(args =>
+                {
+                    if (args != null && args.Length > 0)
+                    {
+                        var error = string.Join(" ", Array.ConvertAll(args, a => a?.ToString() ?? "null"));
+                        _consoleError.AppendLine(error);
+                    }
+                }),
+                warn = new Action<object[]>(args =>
+                {
+                    if (args != null && args.Length > 0)
+                    {
+                        var output = string.Join(" ", Array.ConvertAll(args, a => a?.ToString() ?? "null"));
+                        _consoleOutput.AppendLine($"[WARN] {output}");
+                    }
+                }),
+                info = new Action<object[]>(args =>
+                {
+                    if (args != null && args.Length > 0)
+                    {
+                        var output = string.Join(" ", Array.ConvertAll(args, a => a?.ToString() ?? "null"));
+                        _consoleOutput.AppendLine($"[INFO] {output}");
+                    }
+                })
+            });
 
             // 实现基本的 require 功能（简化版，仅用于模块导出）
             _engine.SetValue("require", new Func<string, object>(moduleName =>
@@ -271,21 +253,8 @@ namespace WodToolkit.Script
                 result.Error = _consoleError.ToString().Trim();
                 result.RawOutput = result.Output;
 
-                // 只有在console.error有输出时才认为是真正的错误
-                // 忽略类型转换相关的错误（因为代码已经执行成功了）
-                bool hasRealError = !string.IsNullOrEmpty(result.Error) && 
-                                    !result.Error.Contains("IConvertible") &&
-                                    !result.Error.Contains("Object must implement");
-                
-                result.Success = !hasRealError;
+                result.Success = string.IsNullOrEmpty(result.Error);
                 result.ExitCode = result.Success ? 0 : 1;
-                
-                // 如果只是类型转换错误，清除错误信息（代码实际执行成功了）
-                if (!hasRealError && !string.IsNullOrEmpty(result.Error) && 
-                    (result.Error.Contains("IConvertible") || result.Error.Contains("Object must implement")))
-                {
-                    result.Error = string.Empty;
-                }
             }
             catch (JavaScriptException ex)
             {
@@ -297,29 +266,11 @@ namespace WodToolkit.Script
             }
             catch (Exception ex)
             {
-                // 检查是否是类型转换错误，如果是且代码已执行（有输出），不应该标记为失败
-                bool isConvertibleError = ex.Message.Contains("IConvertible") || 
-                                         ex.Message.Contains("Object must implement");
-                bool hasOutput = !string.IsNullOrEmpty(_consoleOutput.ToString().Trim());
-                
-                if (isConvertibleError && hasOutput)
-                {
-                    // 代码已执行成功，只是类型转换失败，不应该算作执行失败
-                    result.Success = true;
-                    result.Error = string.Empty;
-                    result.Output = _consoleOutput.ToString().Trim();
-                    result.RawOutput = result.Output;
-                    result.ExitCode = 0;
-                }
-                else
-                {
-                    // 真正的执行失败
-                    result.Success = false;
-                    result.Error = ex.Message;
-                    result.Output = _consoleOutput.ToString().Trim();
-                    result.RawOutput = result.Output;
-                    result.ExitCode = 1;
-                }
+                result.Success = false;
+                result.Error = ex.Message;
+                result.Output = _consoleOutput.ToString().Trim();
+                result.RawOutput = result.Output;
+                result.ExitCode = 1;
             }
 
             return result;
@@ -560,110 +511,43 @@ namespace WodToolkit.Script
                 return value.AsString();
 
             if (value.IsNumber())
-            {
-                try
-                {
-                    return value.AsNumber();
-                }
-                catch
-                {
-                    // 如果转换失败，返回字符串表示
-                    return value.ToString();
-                }
-            }
+                return value.AsNumber();
 
             if (value.IsBoolean())
-            {
-                try
-                {
-                    return value.AsBoolean();
-                }
-                catch
-                {
-                    return value.ToString();
-                }
-            }
+                return value.AsBoolean();
 
             if (value.IsObject())
             {
-                try
-                {
-                    var obj = value.AsObject();
-                    var dict = new Dictionary<string, object>();
+                var obj = value.AsObject();
+                var dict = new Dictionary<string, object>();
 
-                    foreach (var key in obj.GetOwnProperties())
-                    {
-                        try
-                        {
-                            var propValue = obj.Get(key.Key);
-                            dict[key.Key.ToString()] = ConvertJsValueToObject(propValue);
-                        }
-                        catch
-                        {
-                            // 如果属性转换失败，使用字符串表示
-                            dict[key.Key.ToString()] = "[无法转换]";
-                        }
-                    }
-
-                    return dict;
-                }
-                catch
+                foreach (var key in obj.GetOwnProperties())
                 {
-                    // 如果对象转换失败，返回字符串表示
-                    return value.ToString();
+                    var propValue = obj.Get(key.Key);
+                    dict[key.Key.ToString()] = ConvertJsValueToObject(propValue);
                 }
+
+                return dict;
             }
 
             if (value.IsArray())
             {
-                try
+                var array = value.AsArray();
+                var list = new List<object>();
+
+                // 使用 Length 属性获取数组长度
+                var lengthValue = array.Get("length");
+                int length = lengthValue.IsNumber() ? (int)lengthValue.AsNumber() : 0;
+
+                for (int i = 0; i < length; i++)
                 {
-                    var array = value.AsArray();
-                    var list = new List<object>();
-
-                    // 使用 Length 属性获取数组长度
-                    var lengthValue = array.Get("length");
-                    int length = 0;
-                    try
-                    {
-                        length = lengthValue.IsNumber() ? (int)lengthValue.AsNumber() : 0;
-                    }
-                    catch
-                    {
-                        length = 0;
-                    }
-
-                    for (int i = 0; i < length; i++)
-                    {
-                        try
-                        {
-                            list.Add(ConvertJsValueToObject(array.Get(i.ToString())));
-                        }
-                        catch
-                        {
-                            // 如果数组元素转换失败，跳过该元素
-                            continue;
-                        }
-                    }
-
-                    return list;
+                    list.Add(ConvertJsValueToObject(array.Get(i.ToString())));
                 }
-                catch
-                {
-                    // 如果数组转换失败，返回字符串表示
-                    return value.ToString();
-                }
+
+                return list;
             }
 
-            // 最后的备选方案：返回字符串表示
-            try
-            {
-                return value.ToString();
-            }
-            catch
-            {
-                return "[无法转换的对象]";
-            }
+            return value.ToString();
         }
 
         /// <summary>
@@ -679,117 +563,39 @@ namespace WodToolkit.Script
             if (!result.Success)
                 throw new InvalidOperationException($"执行失败: {result.Error}");
 
-            // 如果输出为空，抛出异常
-            if (string.IsNullOrEmpty(result.Output))
-            {
-                throw new InvalidOperationException("执行结果中没有返回值");
-            }
-
             // 查找结果标记
             const string startMarker = "__JINT_RUNNER_RESULT_START__";
             const string endMarker = "__JINT_RUNNER_RESULT_END__";
 
             int startIndex = result.Output.IndexOf(startMarker);
-            
-            // 如果找到了开始标记，查找结束标记
-            if (startIndex >= 0)
-            {
-                // 确保 startIndex + startMarker.Length 不会超出字符串长度
-                int searchStartIndex = startIndex + startMarker.Length;
-                if (searchStartIndex >= result.Output.Length)
-                {
-                    throw new InvalidOperationException("返回值标记格式错误：开始标记后没有内容");
-                }
-                
-                int endIndex = result.Output.IndexOf(endMarker, searchStartIndex);
-                
-                if (endIndex > startIndex + startMarker.Length)
-                {
-                    string jsonResult = result.Output.Substring(
-                        startIndex + startMarker.Length,
-                        endIndex - (startIndex + startMarker.Length)
-                    );
+            int endIndex = result.Output.IndexOf(endMarker, startIndex + startMarker.Length);
 
-                    try
-                    {
-                        return JsonSerializer.Deserialize<T>(jsonResult, _jsonOptions);
-                    }
-                    catch (Exception ex)
-                    {
-                        throw new InvalidOperationException("无法解析返回结果为指定类型", ex);
-                    }
-                }
-                else
+            if (startIndex >= 0 && endIndex > startIndex + startMarker.Length)
+            {
+                string jsonResult = result.Output.Substring(
+                    startIndex + startMarker.Length,
+                    endIndex - (startIndex + startMarker.Length)
+                );
+
+                try
                 {
-                    throw new InvalidOperationException("返回值标记格式错误：未找到结束标记");
+                    return JsonSerializer.Deserialize<T>(jsonResult, _jsonOptions);
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException("无法解析返回结果为指定类型", ex);
                 }
             }
 
             // 如果没有找到标记，尝试直接解析输出
-            // 但首先检查输出是否只是控制台输出（没有返回值）
-            string trimmedOutput = result.Output.Trim();
-            
-            // 如果输出为空，说明没有返回值
-            if (string.IsNullOrEmpty(trimmedOutput))
-            {
-                // 对于值类型，返回默认值
-                if (typeof(T).IsValueType)
-                {
-                    return default(T);
-                }
-                // 对于引用类型，返回 null
-                return default(T);
-            }
-            
-            // 检查输出是否看起来像JSON返回值
-            // 注意：如果输出中没有 __JINT_RUNNER_RESULT_START__ 标记，说明代码没有返回值
-            // 此时输出只是控制台输出（如 console.log 的输出），不应该尝试解析为返回值
-            // 直接返回默认值，避免误解析控制台输出
-            
-            // 如果输出中没有返回值标记，说明只是控制台输出，没有返回值
-            // 对于值类型，返回默认值
-            if (typeof(T).IsValueType)
-            {
-                return default(T);
-            }
-            // 对于引用类型，返回 null
-            return default(T);
-            
             try
             {
-                return JsonSerializer.Deserialize<T>(trimmedOutput, _jsonOptions);
+                return JsonSerializer.Deserialize<T>(result.Output, _jsonOptions);
             }
             catch
             {
                 // 如果解析失败，抛出异常
-                throw new InvalidOperationException("无法从输出中提取有效结果。代码可能没有返回值，或者返回值格式不正确。");
-            }
-        }
-        
-        /// <summary>
-        /// 尝试从执行结果中提取JSON返回值（不抛出异常）
-        /// </summary>
-        /// <typeparam name="T">返回类型</typeparam>
-        /// <param name="result">执行结果</param>
-        /// <param name="value">解析后的对象</param>
-        /// <returns>是否成功提取返回值</returns>
-        public bool TryGetResult<T>(JavaScriptExecutionResult result, out T value)
-        {
-            value = default(T);
-            
-            if (result == null || !result.Success)
-            {
-                return false;
-            }
-            
-            try
-            {
-                value = GetResult<T>(result);
-                return true;
-            }
-            catch
-            {
-                return false;
+                throw new InvalidOperationException("无法从输出中提取有效结果");
             }
         }
 
