@@ -24,7 +24,7 @@ dotnet add package WodToolKit
 ### 通过 PackageReference
 
 ```xml
-<PackageReference Include="WodToolKit" Version="1.0.0.3" />
+<PackageReference Include="WodToolKit" Version="1.0.1.4" />
 ```
 
 ## 第一个示例
