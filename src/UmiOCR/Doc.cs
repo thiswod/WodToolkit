@@ -8,7 +8,7 @@ using System.Text.Json.Serialization;
 using WodToolKit.Http;
 using WodToolKit.Json;
 
-namespace WodToolKit.src.UmiOCR
+namespace WodToolKit.src.UmiOCR.Doc
 {
     /// <summary>
     /// 文档识别类，用于处理 PDF 等文档的 OCR 识别

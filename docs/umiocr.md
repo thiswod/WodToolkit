@@ -34,7 +34,8 @@ WodToolKit 集成了 UmiOCR，提供了便捷的图片和文档文字识别功�
 ### 创建实例
 
 ```csharp
-using WodToolkit.src.UmiOCR;
+using WodToolKit.src.UmiOCR.Ocr;
+using WodToolKit.src.UmiOCR.Doc;
 
 // 图片 OCR（/api/ocr）
 var ocr = new OCR();                    // 默认 http://127.0.0.1:1224

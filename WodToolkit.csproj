@@ -6,7 +6,7 @@
     <PackAsTool>False</PackAsTool>
     <!-- NuGet包元数据 -->
     <PackageId>WodToolKit</PackageId>
-    <Version>1.0.1.6</Version>
+    <Version>1.0.1.7</Version>
     <Title>WodToolKit - 轻量级.NET工具库</Title>
     <Authors>Wod</Authors>
     <Company>Wod</Company>
@@ -15,7 +15,7 @@
     <PackageProjectUrl>https://github.com/thiswod/WodToolKit</PackageProjectUrl>
     <RepositoryUrl>https://github.com/thiswod/WodToolKit</RepositoryUrl>
     <RepositoryType>Git</RepositoryType>
-    <PackageTags>http,json,cookie,aes,encrypt,decrypt,security,.netstandard,toolkit,web,extensions,cache,thread,threadpool,memory-cache,javascript,nodejs,function-call</PackageTags>
+    <PackageTags>http,json,cookie,aes,encrypt,decrypt,security,.netstandard,toolkit,web,extensions,cache,thread,threadpool,memory-cache,javascript,nodejs,function-call,OCR,Umi-OCR</PackageTags>
     <Copyright>© Wod. All rights reserved.</Copyright>
     <IncludeSymbols>False</IncludeSymbols>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>

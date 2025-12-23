@@ -530,7 +530,8 @@ else
 ### OCR 识别示例
 
 ```csharp
-using WodToolkit.src.UmiOCR;
+using WodToolKit.src.UmiOCR.Ocr;
+using WodToolKit.src.UmiOCR.Doc;
 using System.Collections.Generic;
 
 // 1. 创建图片 OCR 实例（默认连接本地服务 http://127.0.0.1:1224）
