@@ -15,6 +15,8 @@
 - **线程池管理**：简单高效的线程池实现，支持任务队列和任务等待
 - **JavaScript执行**：支持两种执行方式，JintRunner（纯.NET实现，无需Node.js）和NodeJsRunner（需要Node.js），支持代码字符串和文件执行、方法调用、变量管理、函数调用等丰富功能
 - **身份证验证**：提供中国身份证号码验证、地址提取、性别识别等功能，支持18位身份证号码的完整校验
+- **OCR 识别**：集成 UmiOCR，支持图片文字识别，可配置识别语言、输出格式、角度检测、忽略区域等参数
+- **Base64 编码**：提供文件、字节数组、字符串等多种数据格式的 Base64 编码功能
 - **.NET Standard 2.1兼容**：支持.NET Core、.NET Framework和其他兼容平台
 - **模块化设计**：各功能模块相互独立，便于扩展和维护
 - **持续更新**：计划逐步添加更多常用功能模块
@@ -525,6 +527,67 @@ else
 }
 ```
 
+### OCR 识别示例
+
+```csharp
+using WodToolkit.src.UmiOCR;
+using System.Collections.Generic;
+
+// 1. 创建 UmiOCR 实例（默认连接本地服务 http://127.0.0.1:1224）
+var umiOcr = new UmiOCR();
+
+// 2. 基本 OCR 识别（使用默认参数）
+string result = umiOcr.Ocr("image.jpg");
+Console.WriteLine($"识别结果: {result}");
+
+// 3. 指定识别语言和输出格式
+string result2 = umiOcr.Ocr("image.jpg", language: "简体中文", format: "json");
+Console.WriteLine($"JSON 格式结果: {result2}");
+
+// 4. 启用角度检测
+string result3 = umiOcr.Ocr("image.jpg", angle: true);
+
+// 5. 指定忽略区域（忽略图片中的某些区域）
+var ignoreAreas = new List<int[][]>
+{
+    new int[][] { new int[] { 10, 20 }, new int[] { 100, 200 } },  // 第一个忽略区域
+    new int[][] { new int[] { 150, 250 }, new int[] { 300, 400 } }  // 第二个忽略区域
+};
+string result4 = umiOcr.Ocr("image.jpg", ignoreArea: ignoreAreas);
+
+// 6. 完整参数示例
+string result5 = umiOcr.Ocr(
+    file: "image.jpg",
+    language: "简体中文",
+    format: "text",
+    parser: "merge_line",
+    angle: true,
+    ignoreArea: ignoreAreas
+);
+
+// 7. 使用自定义 UmiOCR 服务地址
+var customOcr = new UmiOCR("http://192.168.1.100:1224");
+string customResult = customOcr.Ocr("image.jpg");
+```
+
+### Base64 编码示例
+
+```csharp
+using WodToolkit.src.Common;
+
+// 1. 从文件路径编码为 Base64
+string base64FromFile = Common.Base64Encode(@"C:\path\to\image.jpg");
+
+// 2. 从字节数组编码为 Base64
+byte[] fileBytes = File.ReadAllBytes("image.jpg");
+string base64FromBytes = Common.Base64Encode(fileBytes);
+
+// 3. 从字符串编码为 Base64（使用 UTF-8 编码）
+string base64FromText = Common.Base64Encode("Hello World", null);
+// 或明确指定编码
+string base64FromText2 = Common.Base64Encode("你好世界", Encoding.UTF8);
+```
+
 ## 项目架构与组织
 
 WodToolKit采用模块化设计，各功能模块相互独立，便于扩展和维护。整体架构围绕核心功能模块展开，通过清晰的命名空间和类层次结构提供统一的使用体验。
@@ -547,8 +610,11 @@ WodToolKit
 ├── Script/        # 脚本执行
 │   ├── JintRunner        # Jint JavaScript执行器（纯.NET）
 │   └── NodeJsRunner      # Node.js脚本执行器
+├── UmiOCR/        # OCR 识别
+│   └── UmiOCR            # UmiOCR 集成
 └── Common/        # 通用工具
-    └── IDCard            # 身份证验证与信息提取
+    ├── IDCard            # 身份证验证与信息提取
+    └── Common            # 通用工具方法（Base64编码等）
 ```
 
 ### 项目结构
@@ -561,7 +627,8 @@ WodToolKit
 │   ├── Http/           # HTTP相关功能
 │   ├── Json/           # JSON处理功能
 │   ├── Script/         # JavaScript执行和方法调用功能
-│   └── Thread/         # 线程管理功能
+│   ├── Thread/         # 线程管理功能
+│   └── UmiOCR/         # OCR 识别功能
 ├── WodToolkit.csproj   # 项目文件
 └── README.md           # 项目文档
 ```
