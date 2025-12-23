@@ -5,7 +5,7 @@ using System.Net;
 using System.Text;
 using System.Web;
 
-namespace WodToolkit.Http.Extensions
+namespace WodToolKit.Http.Extensions
 {
     public class HttpExtensions
     {

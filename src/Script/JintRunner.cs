@@ -8,7 +8,7 @@ using Jint;
 using Jint.Runtime;
 using Jint.Native;
 
-namespace WodToolkit.Script
+namespace WodToolKit.Script
 {
     /// <summary>
     /// Jint JavaScript执行器，用于在.NET应用中直接执行JavaScript代码（无需Node.js）

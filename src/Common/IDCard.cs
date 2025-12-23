@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using WodToolkit.Json;
+using WodToolKit.Json;
 
-namespace WodToolkit.src.Common
+namespace WodToolKit.src.Common
 {
     public class IDCard
     {

@@ -3,7 +3,7 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace WodToolkit.Encode
+namespace WodToolKit.Encode
 {
     public static class AesCrypt
     {

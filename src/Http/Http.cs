@@ -13,7 +13,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace WodToolkit.Http
+namespace WodToolKit.Http
 {
     #region 代理类型枚举
     /// <summary>

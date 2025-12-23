@@ -8,7 +8,7 @@ using System.Dynamic;
 using System.Collections.Generic;
 using System.Text.Json;
 
-namespace WodToolkit.Script
+namespace WodToolKit.Script
 {
     /// <summary>
     /// Node.js JavaScript执行器，用于在.NET应用中调用Node.js执行JavaScript代码

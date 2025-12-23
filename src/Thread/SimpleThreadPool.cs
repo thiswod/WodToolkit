@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Text;
 using System.Threading;
 
-namespace WodToolkit.Thread
+namespace WodToolKit.Thread
 {
     /// <summary>
     /// 简单线程池类，用于管理多个工作线程执行任务队列中的任务。
