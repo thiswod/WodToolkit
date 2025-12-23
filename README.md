@@ -15,7 +15,7 @@
 - **线程池管理**：简单高效的线程池实现，支持任务队列和任务等待
 - **JavaScript执行**：支持两种执行方式，JintRunner（纯.NET实现，无需Node.js）和NodeJsRunner（需要Node.js），支持代码字符串和文件执行、方法调用、变量管理、函数调用等丰富功能
 - **身份证验证**：提供中国身份证号码验证、地址提取、性别识别等功能，支持18位身份证号码的完整校验
-- **OCR 识别**：集成 UmiOCR，支持图片文字识别，可配置识别语言、输出格式、角度检测、忽略区域等参数
+- **OCR 识别**：集成 UmiOCR，支持图片与文档文字识别，提供图片 OCR（`OCR`）与文档 OCR（`Doc`），可配置识别语言、输出格式、角度检测、忽略区域等参数
 - **Base64 编码**：提供文件、字节数组、字符串等多种数据格式的 Base64 编码功能
 - **.NET Standard 2.1兼容**：支持.NET Core、.NET Framework和其他兼容平台
 - **模块化设计**：各功能模块相互独立，便于扩展和维护
@@ -533,19 +533,19 @@ else
 using WodToolkit.src.UmiOCR;
 using System.Collections.Generic;
 
-// 1. 创建 UmiOCR 实例（默认连接本地服务 http://127.0.0.1:1224）
-var umiOcr = new UmiOCR();
+// 1. 创建图片 OCR 实例（默认连接本地服务 http://127.0.0.1:1224）
+var ocr = new OCR();
 
-// 2. 基本 OCR 识别（使用默认参数）
-string result = umiOcr.Ocr("image.jpg");
-Console.WriteLine($"识别结果: {result}");
+// 2. 基本图片 OCR 识别（使用默认参数）
+string imgResult = ocr.Ocr("image.jpg");
+Console.WriteLine($"识别结果: {imgResult}");
 
 // 3. 指定识别语言和输出格式
-string result2 = umiOcr.Ocr("image.jpg", language: "简体中文", format: "json");
-Console.WriteLine($"JSON 格式结果: {result2}");
+string imgResult2 = ocr.Ocr("image.jpg", language: "简体中文", format: "json");
+Console.WriteLine($"JSON 格式结果: {imgResult2}");
 
 // 4. 启用角度检测
-string result3 = umiOcr.Ocr("image.jpg", angle: true);
+string imgResult3 = ocr.Ocr("image.jpg", angle: true);
 
 // 5. 指定忽略区域（忽略图片中的某些区域）
 var ignoreAreas = new List<int[][]>
@@ -553,21 +553,17 @@ var ignoreAreas = new List<int[][]>
     new int[][] { new int[] { 10, 20 }, new int[] { 100, 200 } },  // 第一个忽略区域
     new int[][] { new int[] { 150, 250 }, new int[] { 300, 400 } }  // 第二个忽略区域
 };
-string result4 = umiOcr.Ocr("image.jpg", ignoreArea: ignoreAreas);
+string imgResult4 = ocr.Ocr("image.jpg", ignoreArea: ignoreAreas);
 
-// 6. 完整参数示例
-string result5 = umiOcr.Ocr(
-    file: "image.jpg",
-    language: "简体中文",
-    format: "text",
-    parser: "merge_line",
-    angle: true,
-    ignoreArea: ignoreAreas
-);
+// 6. 文档 OCR（PDF 等）：仅需传入文件路径
+var doc = new Doc();
+var docResult = doc.Recognize("document.pdf");
 
-// 7. 使用自定义 UmiOCR 服务地址
-var customOcr = new UmiOCR("http://192.168.1.100:1224");
-string customResult = customOcr.Ocr("image.jpg");
+// 想要保存结果文件路径：
+Console.WriteLine(docResult.SavedFilePath);
+
+// 想要识别文本内容：
+Console.WriteLine(docResult.TextContent);
 ```
 
 ### Base64 编码示例
@@ -611,7 +607,8 @@ WodToolKit
 │   ├── JintRunner        # Jint JavaScript执行器（纯.NET）
 │   └── NodeJsRunner      # Node.js脚本执行器
 ├── UmiOCR/        # OCR 识别
-│   └── UmiOCR            # UmiOCR 集成
+│   ├── OCR               # 图片 OCR（/api/ocr）
+│   └── Doc               # 文档 OCR（/api/doc）
 └── Common/        # 通用工具
     ├── IDCard            # 身份证验证与信息提取
     └── Common            # 通用工具方法（Base64编码等）

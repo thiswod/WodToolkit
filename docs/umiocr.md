@@ -1,14 +1,20 @@
 # OCR 识别
 
-WodToolKit 集成了 UmiOCR，提供了便捷的图片文字识别功能。UmiOCR 是一个开源的 OCR 识别服务，支持多种语言和输出格式。
+WodToolKit 集成了 UmiOCR，提供了便捷的图片和文档文字识别功能。UmiOCR 是一个开源的 OCR 识别服务，支持多种语言和输出格式。
 
 ## 功能概述
 
-`UmiOCR` 类提供了以下功能：
+`WodToolKit.src.UmiOCR` 命名空间下提供了两个核心类：
+
+- `OCR`：图片文字识别（对应 UmiOCR `/api/ocr` 接口）
+- `Doc`：文档识别（如 PDF，对应 UmiOCR `/api/doc` 系列接口）
+
+主要能力：
 
 - 图片文字识别
+- 文档/PDF 识别并生成可搜索 PDF、TXT、JSONL 等
 - 支持多种识别语言（中文、英文、中英混合等）
-- 支持多种输出格式（text、json、jsonl）
+- 支持多种输出格式（text、json、jsonl 等）
 - 支持角度自动检测
 - 支持忽略区域设置
 - 支持自定义 UmiOCR 服务地址
@@ -25,23 +31,24 @@ WodToolKit 集成了 UmiOCR，提供了便捷的图片文字识别功能。UmiOC
 
 ## 基本使用
 
-### 创建 UmiOCR 实例
+### 创建实例
 
 ```csharp
 using WodToolkit.src.UmiOCR;
 
-// 使用默认地址（http://127.0.0.1:1224）
-var umiOcr = new UmiOCR();
+// 图片 OCR（/api/ocr）
+var ocr = new OCR();                    // 默认 http://127.0.0.1:1224
+var customOcr = new OCR("http://192.168.1.100:1224");
 
-// 使用自定义地址
-var customOcr = new UmiOCR("http://192.168.1.100:1224");
+// 文档 OCR（/api/doc）
+var doc = new Doc();                    // 默认 http://127.0.0.1:1224
 ```
 
-### 基本 OCR 识别
+### 基本图片 OCR 识别
 
 ```csharp
 // 最简单的使用方式
-string result = umiOcr.Ocr("image.jpg");
+string result = ocr.Ocr("image.jpg");
 Console.WriteLine(result);
 ```
 

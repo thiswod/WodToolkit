@@ -1,25 +1,11 @@
-﻿using Jint;
-using System;
-using System.Buffers.Text;
+﻿using System;
 using System.Collections.Generic;
 using System.Net.Http;
-using System.Text;
-using WodToolKit.Http;
 
 namespace WodToolKit.src.UmiOCR
 {
-    public class UmiOCR
+    public class OCR : @base
     {
-        private string UmiOCRUrl = "http://api.umiocr.com/v1/ocr";
-        private HttpRequestClass http = new HttpRequestClass();
-        /// <summary>
-        /// 初始化 UmiOCR
-        /// <param name="Url">UmiOCR 地址，默认为 "http://127.0.0.1:1224"</param>
-        /// </summary>
-        public UmiOCR(string? Url = "http://127.0.0.1:1224")
-        {
-            UmiOCRUrl = Url ?? UmiOCRUrl;
-        }
         /// <summary>
         /// 执行 OCR 识别
         /// </summary>
@@ -32,7 +18,7 @@ namespace WodToolKit.src.UmiOCR
         /// <returns>OCR 识别结果</returns>
         public string Ocr(string file, string language = "简体中文", string format = "text", string parser = "none", bool angle = false, List<int[][]> ignoreArea = null)
         {
-            http.Open($"{UmiOCRUrl}/api/ocr",HttpMethod.Post);
+            http.Open($"{UmiUrl}/api/ocr",HttpMethod.Post);
             string Base64Img = Common.Common.Base64Encode(file);
 
             var options = new Dictionary<string, object>
