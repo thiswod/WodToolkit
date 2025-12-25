@@ -7,7 +7,7 @@ namespace WodToolKit.src.UmiOCR
 {
     public class @base
     {
-        public string UmiUrl = "http://api.umiocr.com/v1/ocr";
+        public string UmiUrl = "";
         public HttpRequestClass http = new HttpRequestClass();
         /// <summary>
         /// 初始化 Umi

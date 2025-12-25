@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Net.Http;
 
-namespace WodToolKit.src.UmiOCR.Ocr
+namespace WodToolKit.src.UmiOCR.OCR
 {
     public class OCR : @base
     {

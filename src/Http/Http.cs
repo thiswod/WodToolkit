@@ -54,11 +54,12 @@ namespace WodToolKit.Http
         {
             if (string.IsNullOrEmpty(name))
                 throw new ArgumentNullException(nameof(name));
-
-            if (value == "deleted" || string.IsNullOrEmpty(value))
+            if (value == "")
+                return this;
+            /*if (value == "deleted" || string.IsNullOrEmpty(value))
                 _cookies.Remove(name);
             else
-                _cookies[name] = value;
+                _cookies[name] = value;*/
 
             return this;
         }
