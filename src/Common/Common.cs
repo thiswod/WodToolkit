@@ -1,12 +1,30 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace WodToolKit.src.Common
 {
     public class Common
     {
+        /// <summary>
+        /// 生成随机 16 进制字符串（线程安全）
+        /// </summary>
+        /// <param name="length">16 进制字符串长度</param>
+        /// <param name="uppercase">是否大写（默认 true）</param>
+        public static string Generate(int length = 32, bool uppercase = true)
+        {
+            if (length <= 0)
+                throw new ArgumentOutOfRangeException(nameof(length), "Length must be positive.");
+
+            byte[] bytes = new byte[(length + 1) / 2]; // 每 2 字符 = 1 字节
+            RandomNumberGenerator.Fill(bytes);
+
+            string hex = BitConverter.ToString(bytes).Replace("-", "");
+            hex = hex.Length > length ? hex[..length] : hex; // 调整长度
+
+            return uppercase ? hex : hex.ToLowerInvariant();
+        }
         /// <summary>
         /// 获取指定年份的生肖
         /// </summary>
