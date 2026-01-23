@@ -6,7 +6,7 @@
     <PackAsTool>False</PackAsTool>
     <!-- NuGet包元数据 -->
     <PackageId>WodToolKit</PackageId>
-    <Version>1.0.2.5</Version>
+    <Version>1.0.2.6</Version>
     <Title>WodToolKit - 轻量级.NET工具库</Title>
     <Authors>Wod</Authors>
     <Company>Wod</Company>

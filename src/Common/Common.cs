@@ -93,5 +93,45 @@ namespace WodToolKit.src.Common
             byte[] bytes = encoding.GetBytes(text);
             return Convert.ToBase64String(bytes);
         }
+        /// <summary>
+        /// 获取文件扩展名
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <returns></returns>
+        public static string GetFileExtension(string fileName)
+        {
+            int index = fileName.LastIndexOf('.');
+            if (index == -1)
+            {
+                return "";
+            }
+            return fileName.Substring(index + 1);
+        }
+        /// <summary>
+        /// 取随机字符串，首位为字母，长度自定义
+        /// </summary>
+        /// <param name="length"></param>
+        /// <returns></returns>
+        public static string GetRandomString(int length)
+        {
+            if (length <= 0)
+                return string.Empty;
+
+            Random random = new Random();
+            StringBuilder result = new StringBuilder(length);
+            const string letters = "abcdefghijklmnopqrstuvwxyz";
+            const string alphanumeric = "abcdefghijklmnopqrstuvwxyz0123456789";
+
+            // 首位必须为字母
+            result.Append(letters[random.Next(letters.Length)]);
+
+            // 生成剩余字符
+            for (int i = 1; i < length; i++)
+            {
+                result.Append(alphanumeric[random.Next(alphanumeric.Length)]);
+            }
+
+            return result.ToString();
+        }
     }
 }
