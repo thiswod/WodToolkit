@@ -50,7 +50,7 @@ title: WodToolKit - 轻量级.NET工具库
 ## 快速开始
 
 <div class="code-example">
-  <pre><code class="language-csharp">using WodToolkit.Http;
+  <pre><code class="language-csharp">using WodToolKit.Http;
 
 var httpRequest = new HttpRequestClass();
 httpRequest.Open("https://api.example.com/data", HttpMethod.Get).Send();

@@ -15,7 +15,7 @@ WodToolKit 提供了完整的中国身份证号码验证和信息提取功能，
 ### 验证身份证号码
 
 ```csharp
-using WodToolkit.src.Common;
+using WodToolKit.src.Common;
 
 string idCard = "110101199001011234";
 bool isValid = IDCard.IsIdCard(idCard);
@@ -83,7 +83,7 @@ Console.WriteLine($"性别: {gender}"); // 输出: "男" 或 "女"
 ## 完整示例
 
 ```csharp
-using WodToolkit.src.Common;
+using WodToolKit.src.Common;
 using System.Collections.Generic;
 
 string idCard = "110101199001011234";

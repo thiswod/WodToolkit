@@ -8,12 +8,16 @@ A lightweight .NET toolkit that provides encapsulation of various common functio
 
 - **HTTP Request Handling**: Simplified HTTP client operations, supporting various HTTP methods and request configurations, with support for HTTP/HTTPS and SOCKS4/SOCKS5 proxies
 - **Cookie Management**: Complete cookie management functionality, supporting addition, retrieval, deletion, and batch operations
-- **JSON Parsing**: Flexible JSON serialization and deserialization, supporting dynamic types and custom types
+- **JSON Parsing**: Flexible JSON serialization and deserialization, supporting dynamic types and custom types, with JSON validation, array parsing, and DateTime conversion support
 - **URL Tools**: URL parameter processing, sorting, and conversion utilities
 - **AES Encryption**: Secure AES encryption and decryption functionality, supporting multiple encryption modes and padding methods
 - **Memory Cache**: Memory-based temporary cache implementation with TTL settings and automatic cleanup
 - **Thread Pool Management**: Simple and efficient thread pool implementation supporting task queuing and waiting
-- **JavaScript Execution**: Supports two execution methods, JintRunner (pure .NET implementation, no Node.js required) and NodeJsRunner (requires Node.js), supporting code string and file execution, as well as calling specific methods with parameters
+- **JavaScript Execution**: Supports two execution methods, JintRunner (pure .NET implementation, no Node.js required) and NodeJsRunner (requires Node.js), supporting code string and file execution, method calls with parameters, variable management, and console output capture
+- **ID Card Verification**: Chinese ID card number verification, address extraction, and gender identification (supports 18-digit ID cards)
+- **OCR Recognition**: Integrated UmiOCR, supporting image and document text recognition with configurable language, output format, angle detection, and ignore regions
+- **Base64 Encoding**: Support for file, byte array, and string Base64 encoding
+- **Common Utilities**: Random hex generation, Chinese zodiac lookup, file extension extraction, and random string generation
 - **.NET Standard 2.1 Compatibility**: Supports .NET Core, .NET Framework, and other compatible platforms
 - **Modular Design**: Each functional module is independent, facilitating extension and maintenance
 - **Continuous Updates**: Plans to gradually add more common function modules
@@ -37,7 +41,7 @@ dotnet add package WodToolKit
 ### Memory Cache Example
 
 ```csharp
-using WodToolkit.src.Cache;
+using WodToolKit.src.Cache;
 
 // Create temporary cache instance (cleans every 30 seconds, default TTL is 300 seconds)
 var cache = new TempCache<string, string>(TimeSpan.FromSeconds(30), 300);
@@ -65,7 +69,7 @@ cache.Remove("key2");
 ### Thread Pool Usage Example
 
 ```csharp
-using WodToolkit.src.Thread;
+using WodToolKit.src.Thread;
 
 // Create thread pool (4 worker threads)
 var threadPool = new SimpleThreadPool(4);
@@ -92,7 +96,7 @@ Console.WriteLine("All tasks completed");
 ### HTTP Request Example
 
 ```csharp
-using WodToolkit.Http;
+using WodToolKit.Http;
 using System.Net;
 using System.Collections.Generic;
 
@@ -218,15 +222,24 @@ string sessionId = cookieManager.GetCookieValue("sessionId");
 ```csharp
 using WodToolKit.Json;
 
-// Parse JSON string
+// 1. Parse JSON string to dynamic object
 string json = "{\"name\": \"Example\", \"value\": 42}";
 dynamic result = EasyJson.ParseJsonToDynamic(json);
-
-// Access dynamic object properties
 Console.WriteLine(result.name); // Output: Example
 Console.WriteLine(result.value); // Output: 42
 
-// Parse to strongly typed object
+// 2. Validate if string is valid JSON format
+bool isValid = EasyJson.IsValidJson("{\"key\": \"value\"}");
+Console.WriteLine($"Is valid JSON: {isValid}"); // Output: True
+
+// 3. Parse JSON array to array of specified type
+string jsonArray = "[1, 2, 3, 4, 5]";
+int[] numbers = EasyJson.ParseJsonArray<int>(jsonArray);
+
+// 4. Parse JSON array to dynamic list
+List<object> list = EasyJson.ParseAnyJsonArray(jsonArray);
+
+// 5. Parse JSON to strongly typed object (supports custom types and DateTime conversion)
 var obj = EasyJson.ParseJsonObject<MyClass>(json);
 ```
 
@@ -256,7 +269,7 @@ WodToolKit provides two JavaScript executors: `NodeJsRunner` (requires Node.js) 
 #### Method 1: Using JintRunner (Recommended, No Node.js Required)
 
 ```csharp
-using WodToolkit.Script;
+using WodToolKit.Script;
 
 // Create Jint executor (pure .NET implementation, no Node.js installation needed)
 using (var jintRunner = new JintRunner())
@@ -349,7 +362,7 @@ using (var jintRunner = new JintRunner())
 #### Method 2: Using NodeJsRunner (Requires Node.js Installation)
 
 ```csharp
-using WodToolkit.Script;
+using WodToolKit.Script;
 
 // Create Node.js executor (requires Node.js to be installed on the system)
 using (var nodeRunner = new NodeJsRunner())
@@ -464,8 +477,15 @@ WodToolKit
 │   └── SimpleThreadPool  # Thread pool implementation
 ├── Encode/        # Encryption functionality
 │   └── AesCrypt          # AES encryption and decryption
-└── Script/        # Script execution
-    └── NodeJsRunner      # Node.js script executor
+├── Script/        # Script execution
+│   ├── JintRunner        # Jint JavaScript executor (pure .NET)
+│   └── NodeJsRunner      # Node.js script executor
+├── UmiOCR/        # OCR recognition
+│   ├── OCR               # Image OCR (/api/ocr)
+│   └── Doc               # Document OCR (/api/doc)
+└── Common/        # Common utilities
+    ├── IDCard            # ID card verification and info extraction
+    └── Common            # Common utility methods (Base64 encoding, etc.)
 ```
 
 ### Project Structure
@@ -478,7 +498,7 @@ WodToolKit
 │   ├── Json/           # JSON processing functionality
 │   ├── Script/         # JavaScript execution and method call functionality
 │   └── Thread/         # Thread management functionality
-├── WodToolkit.csproj   # Project file
+├── WodToolKit.csproj   # Project file
 └── README.md           # Project documentation
 ```
 

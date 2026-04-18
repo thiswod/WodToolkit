@@ -7,16 +7,18 @@
 ## 功能特性
 
 - **HTTP请求处理**：简化HTTP客户端操作，支持各种HTTP方法和请求配置，支持HTTP/HTTPS和SOCKS4/SOCKS5代理
-- **Cookie管理**：完整的Cookie管理功能，支持添加、获取、删除和批量操作
-- **JSON解析**：灵活的JSON序列化和反序列化，支持动态类型和自定义类型
+- **Cookie管理**：完整的Cookie管理功能，支持添加、获取、删除和批量操作，支持导入/导出WebView2 Cookie
+- **JSON解析**：灵活的JSON序列化和反序列化，支持动态类型和自定义类型，支持JSON验证、数组解析、DateTime转换
 - **URL工具**：URL参数处理、排序和转换工具
 - **AES加密**：安全的AES加密和解密功能，支持多种加密模式和填充方式
 - **内存缓存**：基于内存的临时缓存实现，支持TTL设置和自动清理
 - **线程池管理**：简单高效的线程池实现，支持任务队列和任务等待
-- **JavaScript执行**：支持两种执行方式，JintRunner（纯.NET实现，无需Node.js）和NodeJsRunner（需要Node.js），支持代码字符串和文件执行、方法调用、变量管理、函数调用等丰富功能
+- **JavaScript执行**：支持两种执行方式，JintRunner（纯.NET实现，无需Node.js）和NodeJsRunner（需要Node.js），支持代码字符串和文件执行、方法调用、变量管理、函数调用、控制台输出捕获等丰富功能
 - **身份证验证**：提供中国身份证号码验证、地址提取、性别识别等功能，支持18位身份证号码的完整校验
 - **OCR 识别**：集成 UmiOCR，支持图片与文档文字识别，提供图片 OCR（`OCR`）与文档 OCR（`Doc`），可配置识别语言、输出格式、角度检测、忽略区域等参数
 - **Base64 编码**：提供文件、字节数组、字符串等多种数据格式的 Base64 编码功能
+- **通用工具**：随机Hex生成、生肖查询、文件扩展名提取、随机字符串生成等工具方法
+- **临时请求头**：支持临时请求头设置（仅对单次请求有效）
 - **.NET Standard 2.1兼容**：支持.NET Core、.NET Framework和其他兼容平台
 - **模块化设计**：各功能模块相互独立，便于扩展和维护
 - **持续更新**：计划逐步添加更多常用功能模块
@@ -40,7 +42,7 @@ dotnet add package WodToolKit
 ### 内存缓存示例
 
 ```csharp
-using WodToolkit.src.Cache;
+using WodToolKit.src.Cache;
 
 // 创建临时缓存实例（每30秒清理一次，默认TTL为300秒）
 var cache = new TempCache<string, string>(TimeSpan.FromSeconds(30), 300);
@@ -68,7 +70,7 @@ cache.Remove("key2");
 ### 线程池使用示例
 
 ```csharp
-using WodToolkit.src.Thread;
+using WodToolKit.src.Thread;
 
 // 创建线程池（4个工作线程）
 var threadPool = new SimpleThreadPool(4);
@@ -95,7 +97,7 @@ Console.WriteLine("所有任务执行完毕");
 ### HTTP请求示例
 
 ```csharp
-using WodToolkit.Http;
+using WodToolKit.Http;
 using System.Net;
 using System.Collections.Generic;
 
@@ -145,7 +147,7 @@ var asyncRequest = new HttpRequestClass();
 // 设置超时时间
 asyncRequest.SetTimeout(30); // 30秒
 // 设置UserAgent
-asyncRequest.SetUserAgent("Mozilla/5.0 WodToolkit");
+asyncRequest.SetUserAgent("Mozilla/5.0 WodToolKit");
 // 异步发送请求
 await asyncRequest.Open("https://api.example.com/data", HttpMethod.Get).SendAsync();
 var asyncResponse = asyncRequest.GetResponse();
@@ -221,15 +223,24 @@ string sessionId = cookieManager.GetCookieValue("sessionId");
 ```csharp
 using WodToolKit.Json;
 
-// 解析JSON字符串
+// 1. 解析JSON字符串为动态对象
 string json = "{\"name\": \"Example\", \"value\": 42}";
 dynamic result = EasyJson.ParseJsonToDynamic(json);
-
-// 访问动态对象属性
 Console.WriteLine(result.name); // 输出: Example
 Console.WriteLine(result.value); // 输出: 42
 
-// 解析为强类型对象
+// 2. 验证字符串是否为有效的JSON格式
+bool isValid = EasyJson.IsValidJson("{\"key\": \"value\"}");
+Console.WriteLine($"是否为有效JSON: {isValid}"); // 输出: True
+
+// 3. 解析JSON数组为指定类型的数组
+string jsonArray = "[1, 2, 3, 4, 5]";
+int[] numbers = EasyJson.ParseJsonArray<int>(jsonArray);
+
+// 4. 解析JSON数组为动态列表
+List<object> list = EasyJson.ParseAnyJsonArray(jsonArray);
+
+// 5. 解析为强类型对象（支持自定义类型和DateTime转换）
 var obj = EasyJson.ParseJsonObject<MyClass>(json);
 ```
 
@@ -259,7 +270,7 @@ WodToolKit 提供了两种 JavaScript 执行器：`NodeJsRunner`（需要 Node.j
 #### 方式一：使用 JintRunner（推荐，无需 Node.js）
 
 ```csharp
-using WodToolkit.Script;
+using WodToolKit.Script;
 
 // 创建 Jint 执行器（纯 .NET 实现，无需安装 Node.js）
 using (var jintRunner = new JintRunner())
@@ -382,7 +393,7 @@ using (var jintRunner = new JintRunner())
 #### 方式二：使用 NodeJsRunner（需要安装 Node.js）
 
 ```csharp
-using WodToolkit.Script;
+using WodToolKit.Script;
 
 // 创建 Node.js 执行器（需要系统已安装 Node.js）
 using (var nodeRunner = new NodeJsRunner())
@@ -482,7 +493,7 @@ module.exports = {
 ### 身份证验证示例
 
 ```csharp
-using WodToolkit.src.Common;
+using WodToolKit.src.Common;
 
 // 1. 验证身份证号码是否合法
 string idCard = "110101199001011234";
@@ -570,7 +581,7 @@ Console.WriteLine(docResult.TextContent);
 ### Base64 编码示例
 
 ```csharp
-using WodToolkit.src.Common;
+using WodToolKit.src.Common;
 
 // 1. 从文件路径编码为 Base64
 string base64FromFile = Common.Base64Encode(@"C:\path\to\image.jpg");
@@ -583,6 +594,43 @@ string base64FromBytes = Common.Base64Encode(fileBytes);
 string base64FromText = Common.Base64Encode("Hello World", null);
 // 或明确指定编码
 string base64FromText2 = Common.Base64Encode("你好世界", Encoding.UTF8);
+```
+
+### 通用工具方法示例
+
+```csharp
+using WodToolKit.src.Common;
+
+// 1. 生成随机 16 进制字符串（线程安全）
+string hex = Common.Generate(32, true);
+Console.WriteLine($"随机Hex: {hex}");
+
+// 2. 获取指定年份的生肖
+string zodiac = Common.getChineseZodiac(2024);
+Console.WriteLine($"2024年生肖: {zodiac}");
+
+// 3. 获取文件扩展名
+string ext = Common.GetFileExtension("document.pdf");
+Console.WriteLine($"扩展名: {ext}"); // 输出: pdf
+
+// 4. 生成随机字符串（首位为字母）
+string randomStr = Common.GetRandomString(10);
+Console.WriteLine($"随机字符串: {randomStr}");
+```
+
+### 临时请求头示例
+
+```csharp
+using WodToolKit.Http;
+
+// 设置临时请求头（仅对下一次请求有效）
+var request = new HttpRequestClass();
+request.SetTemporaryHeader("X-Custom-Header", "custom-value")
+       .SetTemporaryHeader("Authorization", "Bearer token")
+       .Open("https://api.example.com/data", HttpMethod.Get)
+       .Send();
+// 请求发送后，临时头会自动清除
+var response = request.GetResponse();
 ```
 
 ## 项目架构与组织
@@ -627,7 +675,7 @@ WodToolKit
 │   ├── Script/         # JavaScript执行和方法调用功能
 │   ├── Thread/         # 线程管理功能
 │   └── UmiOCR/         # OCR 识别功能
-├── WodToolkit.csproj   # 项目文件
+├── WodToolKit.csproj   # 项目文件
 └── README.md           # 项目文档
 ```
 

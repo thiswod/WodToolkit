@@ -12,7 +12,7 @@ WodToolKit 提供了简单易用的 HTTP 客户端，支持各种 HTTP 方法和
 ### GET 请求
 
 ```csharp
-using WodToolkit.Http;
+using WodToolKit.Http;
 using System.Net;
 
 var httpRequest = new HttpRequestClass();
@@ -123,7 +123,7 @@ uploadRequest.Open("https://api.example.com/upload", HttpMethod.Post).Send();
 ## 完整示例
 
 ```csharp
-using WodToolkit.Http;
+using WodToolKit.Http;
 using System.Net;
 
 var httpRequest = new HttpRequestClass();

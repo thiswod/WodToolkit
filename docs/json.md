@@ -12,7 +12,7 @@ WodToolKit 提供了灵活的 JSON 序列化和反序列化功能，支持动态
 ### 解析为动态类型
 
 ```csharp
-using WodToolkit.Json;
+using WodToolKit.Json;
 
 string json = "{\"name\": \"Example\", \"value\": 42, \"active\": true}";
 
@@ -102,7 +102,7 @@ foreach (var user in result.users)
 ## 完整示例
 
 ```csharp
-using WodToolkit.Json;
+using WodToolKit.Json;
 
 // 创建对象
 var data = new

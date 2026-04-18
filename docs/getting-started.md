@@ -32,7 +32,7 @@ dotnet add package WodToolKit
 ### HTTP 请求示例
 
 ```csharp
-using WodToolkit.Http;
+using WodToolKit.Http;
 using System.Net;
 
 // 创建 HTTP 请求实例
@@ -55,7 +55,7 @@ if (response.StatusCode == 200)
 ### Cookie 管理示例
 
 ```csharp
-using WodToolkit.Http;
+using WodToolKit.Http;
 
 // 创建 Cookie 管理器
 var cookieManager = new CookieManager();
@@ -72,7 +72,7 @@ Console.WriteLine(cookieString); // 输出: sessionId=abc123; userId=user456
 ### JavaScript 执行示例
 
 ```csharp
-using WodToolkit.Script;
+using WodToolKit.Script;
 
 // 使用 JintRunner（推荐，无需 Node.js）
 using (var jintRunner = new JintRunner())
